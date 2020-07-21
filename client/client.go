@@ -116,6 +116,12 @@ func CheckRedirect(req *http.Request, via []*http.Request) error {
 // It won't send any version information if the version number is empty. It is
 // highly recommended that you set a version or your client may break if the
 // server is upgraded.
+/*
+NewClientWithOpts用默认值初始化新的API客户端。
+函数在创建时需要修改值，如`NewClientWithOpts(WithVersion(…)`它还初始化要添加到每个请求的自定义http头部。
+如果版本号为空，则不会发送任何版本信息。
+强烈建议您设置一个版本，否则如果升级服务器，您的客户端可能会中断。
+*/
 func NewClientWithOpts(ops ...Opt) (*Client, error) {
 	client, err := defaultHTTPClient(DefaultDockerHost)
 	if err != nil {

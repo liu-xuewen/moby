@@ -124,6 +124,9 @@ func (cli *DaemonCli) start(opts *daemonOptions) (err error) {
 
 	// Create the daemon root before we create ANY other files (PID, or migrate keys)
 	// to ensure the appropriate ACL is set (particularly relevant on Windows)
+	/*
+	在创建任何其他文件(PID或迁移密钥)之前创建守护程序根目录，以确保设置了适当的ACL(尤其与Windows相关)
+	*/
 	if err := daemon.CreateDaemonRoot(cli.Config); err != nil {
 		return err
 	}
@@ -149,6 +152,9 @@ func (cli *DaemonCli) start(opts *daemonOptions) (err error) {
 
 	if cli.Config.IsRootless() {
 		// Set sticky bit if XDG_RUNTIME_DIR is set && the file is actually under XDG_RUNTIME_DIR
+		/*
+		如果设置了XDG_RUNTIME_DIR，则设置粘滞位&文件实际上位于XDG_RUNTIME_DIR下
+		*/
 		if _, err := homedir.StickRuntimeDirContents(potentiallyUnderRuntimeDir); err != nil {
 			// StickRuntimeDirContents returns nil error if XDG_RUNTIME_DIR is just unset
 			logrus.WithError(err).Warn("cannot set sticky bit on files under XDG_RUNTIME_DIR")

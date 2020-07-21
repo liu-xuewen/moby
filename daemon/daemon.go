@@ -719,6 +719,9 @@ func (daemon *Daemon) IsSwarmCompatible() error {
 
 // NewDaemon sets up everything for the daemon to be able to service
 // requests from the webserver.
+/*
+NewDaemon为该守护程序设置一切，以便能够为来自Web服务器的请求提供服务。
+*/
 func NewDaemon(ctx context.Context, config *config.Config, pluginStore *plugin.Store) (daemon *Daemon, err error) {
 	setDefaultMtu(config)
 
@@ -855,6 +858,11 @@ func NewDaemon(ctx context.Context, config *config.Config, pluginStore *plugin.S
 	// lcow. Unix platforms however run a single graphdriver for all containers, and it can
 	// be set through an environment variable, a daemon start parameter, or chosen through
 	// initialization of the layerstore through driver priority order for example.
+	/*
+	在Windows上，我们不支持环境变量，也不支持用户提供的图形驱动程序，因为Windows在使用哪个图形驱动程序方面没有选择余地。
+	这是一个在Windows上运行Windows容器的例子-windowsfilter，在Windows上运行Linux容器。
+	然而，UNIX平台对所有容器运行单个图形驱动程序，并且可以通过环境变量、守护程序启动参数来设置，或者例如通过驱动程序优先级顺序通过层存储的初始化来选择。
+	*/
 	d.graphDrivers = make(map[string]string)
 	layerStores := make(map[string]layer.Store)
 	if isWindows {
@@ -903,6 +911,19 @@ func NewDaemon(ctx context.Context, config *config.Config, pluginStore *plugin.S
 		// It is painful. Add WithBlock can prevent the edge case. And
 		// n common case, the containerd will be serving in shortly.
 		// It is not harm to add WithBlock for containerd connection.
+		/*
+		WithBlock确保以下containerd请求是可靠的。
+		注：在一个负载压力较高的边缘情况下，内核会杀死dockerd、containerd和containerd-shims，这是由OOM引起的。
+		当dockerd和tainerd都重新启动时，但是tainerd需要时间来恢复所有现有的容器。
+		在提供容器服务之前，dockerd将失败，并显示GRPC错误。
+		不好的是，恢复操作仍然会忽略任何非NotFound错误，并返回已经停止的容器的运行状态。
+		这是意想不到的行为。
+		我们需要重新启动dockerd以确保一切正常。
+		这是痛苦的。
+		添加WithBlock可以防止边缘情况。
+		在常见的情况下，集装箱很快就会运进来。
+		为容器连接添加WithBlock无伤大雅。
+		*/
 		grpc.WithBlock(),
 
 		grpc.WithInsecure(),
@@ -979,6 +1000,10 @@ func NewDaemon(ctx context.Context, config *config.Config, pluginStore *plugin.S
 
 	// Configure and validate the kernels security support. Note this is a Linux/FreeBSD
 	// operation only, so it is safe to pass *just* the runtime OS graphdriver.
+	/*
+	配置并验证内核安全支持。
+	注意：这只是一个Linux/FreeBSD操作，所以传递*只是*运行时操作系统的图形驱动程序是安全的。
+	*/
 	if err := configureKernelSecuritySupport(config, d.graphDrivers[runtime.GOOS]); err != nil {
 		return nil, err
 	}
@@ -1024,6 +1049,13 @@ func NewDaemon(ctx context.Context, config *config.Config, pluginStore *plugin.S
 	// operating systems, the list of graphdrivers available isn't user configurable.
 	// For backwards compatibility, we just put it under the windowsfilter
 	// directory regardless.
+	/*
+	我们在全局范围内为守护进程提供了单一的标记/引用存储。
+	但是，它存储在图形驱动程序下。
+	在仅支持单个容器操作系统但支持多个可选图形驱动程序的主机平台上，这意味着根据选择的图形驱动程序，全局引用存储位于其下方。
+	对于支持多个容器操作系统的平台，这稍微更成问题，因为全局引用存储位于何处？幸运的是，对于Windows来说，它是目前唯一支持多容器操作系统的守护进程，可用的图形驱动程序列表不是用户可配置的。
+	为了向后兼容，我们只将其放在windowsfilter目录下。
+	*/
 	refStoreLocation := filepath.Join(imageRoot, `repositories.json`)
 	rs, err := refstore.NewReferenceStore(refStoreLocation)
 	if err != nil {

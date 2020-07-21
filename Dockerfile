@@ -47,6 +47,13 @@ WORKDIR /go/src/github.com/docker/distribution
 # push/pull with both schema1 and schema2 manifests.
 # The old version of the registry is not working on arm64, so installation is
 # skipped on that architecture.
+#/*
+#安装注册表的两个版本。
+#第一个是同时支持模式1和模式2清单的最新版本。
+#第二个是只支持Schema1清单的旧版本。
+#这允许集成CLI测试涵盖Schema1和schema2清单的推/拉。
+#旧版本的注册表在arm64上不起作用，因此将跳过在该体系结构上的安装。
+#*/
 ENV REGISTRY_COMMIT_SCHEMA1 ec87e9b6971d831f0eff752ddb54fb64693e51cd
 ENV REGISTRY_COMMIT 47a064d4195a9b56133891bbb13620c3ac83a827
 RUN --mount=type=cache,target=/root/.cache/go-build \
@@ -70,6 +77,9 @@ WORKDIR $GOPATH/src/github.com/go-swagger/go-swagger
 # Install go-swagger for validating swagger.yaml
 # This is https://github.com/kolyshkin/go-swagger/tree/golang-1.13-fix
 # TODO: move to under moby/ or fix upstream go-swagger to work for us.
+#/*
+#安装go-swagger以验证swagger.yaml这是https：/github.com/kolyshkin/go-swagger/tree/golang-1.13-fix TODO：移动到Moby下/或修复上游Go-swagger为我们工作。
+#*/
 ENV GO_SWAGGER_COMMIT 5e6cb12f7c82ce78e45ba71fa6cb1928094db050
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
@@ -87,6 +97,9 @@ RUN --mount=type=cache,sharing=locked,id=moby-frozen-images-aptlib,target=/var/l
            ca-certificates \
            jq
 # Get useful and necessary Hub images so we can "docker load" locally instead of pulling
+#/*
+#获取有用且必要的集线器映像，以便我们可以在本地“对接加载”，而不是拉入
+#*/
 COPY contrib/download-frozen-image-v2.sh /
 RUN /download-frozen-image-v2.sh /build \
         buildpack-deps:buster@sha256:d0abb4b1e5c664828b93e8b6ac84d10bce45ee469999bef88304be04a2709491 \
@@ -132,6 +145,10 @@ ARG DEBIAN_FRONTEND
 # on non-amd64 systems.
 # Additionally, the crossbuild-amd64 is currently only on debian:buster, so
 # other architectures cannnot crossbuild amd64.
+#/*
+#这些交叉构建包依赖于gcc-<arch>，但是它不想安装在非AMD64系统上。
+#另外，CrossBuild-AMD64目前只在debian：buster上，所以其他架构不能交叉构建AMD64。
+#*/
 RUN --mount=type=cache,sharing=locked,id=moby-cross-true-aptlib,target=/var/lib/apt \
     --mount=type=cache,sharing=locked,id=moby-cross-true-aptcache,target=/var/cache/apt \
         apt-get update && apt-get install -y --no-install-recommends \
@@ -253,6 +270,10 @@ RUN ln -s /usr/local/completion/bash/docker /etc/bash_completion.d/docker
 RUN ldconfig
 # This should only install packages that are specifically needed for the dev environment and nothing else
 # Do you really need to add another package here? Can it be done in a different build stage?
+#/*
+#这应该只安装开发环境特别需要的软件包，而不安装其他任何东西。
+#您真的需要在这里添加另一个软件包吗？它可以在不同的构建阶段完成吗？
+#*/
 RUN --mount=type=cache,sharing=locked,id=moby-dev-aptlib,target=/var/lib/apt \
     --mount=type=cache,sharing=locked,id=moby-dev-aptcache,target=/var/cache/apt \
         apt-get update && apt-get install -y --no-install-recommends \
@@ -311,7 +332,7 @@ ENV DOCKER_BUILDTAGS="${DOCKER_BUILDTAGS}"
 WORKDIR /go/src/github.com/docker/docker
 VOLUME /var/lib/docker
 VOLUME /home/unprivilegeduser/.local/share/docker
-# Wrap all commands in the "docker-in-docker" script to allow nested containers
+# Wrap all commands in the "docker-in-docker" script to allow nested containers 将所有命令包装在“docker-in-docker”脚本中以允许嵌套容器
 ENTRYPOINT ["hack/dind"]
 
 FROM dev-systemd-false AS dev-systemd-true
@@ -345,7 +366,7 @@ ENV DOCKER_BUILDTAGS="${DOCKER_BUILDTAGS}"
 ENV PREFIX=/build
 # TODO: This is here because hack/make.sh binary copies these extras binaries
 # from $PATH into the bundles dir.
-# It would be nice to handle this in a different way.
+# It would be nice to handle this in a different way. 如果能用不同的方式来处理这件事就好了。
 COPY --from=tini        /build/ /usr/local/bin/
 COPY --from=runc        /build/ /usr/local/bin/
 COPY --from=containerd  /build/ /usr/local/bin/
