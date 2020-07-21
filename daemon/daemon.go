@@ -1283,6 +1283,9 @@ func (daemon *Daemon) Shutdown() error {
 
 // Mount sets container.BaseFS
 // (is it not set coming in? why is it unset?)
+/*
+mount sets tainer.BaseFS(它是否未设置为传入？(为什么没有设置？)
+*/
 func (daemon *Daemon) Mount(container *container.Container) error {
 	if container.RWLayer == nil {
 		return errors.New("RWLayer of container " + container.ID + " is unexpectedly nil")
@@ -1297,6 +1300,10 @@ func (daemon *Daemon) Mount(container *container.Container) error {
 		// The mount path reported by the graph driver should always be trusted on Windows, since the
 		// volume path for a given mounted layer may change over time.  This should only be an error
 		// on non-Windows operating systems.
+		/*
+		图形驱动程序报告的挂载路径在Windows上应该始终可信，因为给定挂载层的卷路径可能会随着时间的推移而更改。
+		这应该只是非Windows操作系统上的错误。
+		*/
 		if runtime.GOOS != "windows" {
 			daemon.Unmount(container)
 			return fmt.Errorf("Error: driver %s is returning inconsistent paths for container %s ('%s' then '%s')",

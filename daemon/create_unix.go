@@ -19,6 +19,9 @@ import (
 )
 
 // createContainerOSSpecificSettings performs host-OS specific container create functionality
+/*
+createContainerOSSpecificSettings执行特定于主机操作系统的容器创建功能
+*/
 func (daemon *Daemon) createContainerOSSpecificSettings(container *container.Container, config *containertypes.Config, hostConfig *containertypes.HostConfig) error {
 	if err := daemon.Mount(container); err != nil {
 		return err

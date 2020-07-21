@@ -66,6 +66,21 @@ var (
 // lower directories can fit in a single page for making the mount
 // syscall. A hard upper limit of 128 lower layers is enforced to ensure
 // that mounts do not fail due to length.
+/*
+该后端将覆盖联合文件系统用于每层具有不同目录的容器。
+此版本的覆盖驱动程序至少需要内核4.0.0才能支持挂载多个diff目录。
+每个容器/映像至少有一个“diff”目录和“link”文件。
+如果在下面有diff层以及“合并”和“工作”目录时也有“较低”文件。
+“diff”目录具有覆盖的上层，用于捕获该层的任何更改。
+“较低”文件包含所有较低层挂载，以“：”分隔，并从最高层到最低层排序。
+覆盖本身挂载在“合并”目录中，覆盖需要“work”目录才能工作。
+每一层的“链接”文件都包含该层的唯一字符串。
+在根目录的“l”目录下，将有一个符号链接，该符号链接具有指向该层的“diff”目录的唯一字符串。
+符号链接用于引用“较低”文件中的较低层和挂载时的较低层。
+这些链接用于缩短图层引用的总长度，而不需要更改图层标识符或根目录。
+挂载始终相对于root并引用符号链接，以确保较低目录的数量可以容纳在单个页面中以进行挂载syscall。
+强制实施128个下层的硬上限，以确保安装不会因长度而失败。
+*/
 
 const (
 	driverName    = "overlay2"
@@ -83,6 +98,12 @@ const (
 	// The idLength should be selected such that following equation
 	// is true (512 is a buffer for label metadata).
 	// ((idLength + len(linkDir) + 1) * maxDepth) <= (pageSize - 512)
+	/*
+	idLength表示可用于为每一层创建唯一链接标识符的随机字符的数量。
+	如果此值太长，则可能会超过装载命令的页面大小限制。
+	应该选择idLength，使得以下等式为真(512是标签元数据的缓冲器)。
+	(idLength+len(LinkDir)+1)*maxDepth)<=(pageSize-512)
+	*/
 	idLength = 26
 )
 
@@ -93,6 +114,9 @@ type overlayOptions struct {
 
 // Driver contains information about the home directory and the list of active
 // mounts that are created using this driver.
+/*
+驱动程序包含有关主目录和使用此驱动程序创建的活动装载列表的信息。
+*/
 type Driver struct {
 	home          string
 	uidMaps       []idtools.IDMap
@@ -125,6 +149,11 @@ func init() {
 // graphdriver.ErrNotSupported is returned.
 // If an overlay filesystem is not supported over an existing filesystem then
 // the error graphdriver.ErrIncompatibleFS is returned.
+/*
+init返回覆盖文件系统的本机diff驱动程序。
+如果主机上不支持覆盖文件系统，则返回错误raphdriver.ErrNotSupport。
+如果现有文件系统不支持覆盖文件系统，则返回错误raphdriver.ErrInpatibleFS。
+*/
 func Init(home string, options []string, uidMaps, gidMaps []idtools.IDMap) (graphdriver.Driver, error) {
 	opts, err := parseOptions(options)
 	if err != nil {
@@ -135,6 +164,11 @@ func Init(home string, options []string, uidMaps, gidMaps []idtools.IDMap) (grap
 	// This covers situations where /var/lib/docker/overlay2 is a mount, and on a different
 	// filesystem than /var/lib/docker.
 	// If the path does not exist, fall back to using /var/lib/docker for feature detection.
+	/*
+	如果/var/lib/docker/overlay2是现有目录，则在该目录上执行特性检测。
+	这涵盖了/var/lib/docker/overlay2是挂载的情况，并且位于与/var/lib/docker不同的文件系统上。
+	如果路径不存在，请重新使用/var/lib/docker进行功能检测。
+	*/
 	testdir := home
 	if _, err := os.Stat(testdir); os.IsNotExist(err) {
 		testdir = filepath.Dir(testdir)
@@ -257,6 +291,10 @@ func (d *Driver) String() string {
 
 // Status returns current driver information in a two dimensional string array.
 // Output contains "Backing Filesystem" used in this implementation.
+/*
+Status以二维字符串数组形式返回当前驱动程序信息。
+输出包含此实现中使用的“支持文件系统”。
+*/
 func (d *Driver) Status() [][2]string {
 	return [][2]string{
 		{"Backing Filesystem", backingFs},
@@ -267,6 +305,9 @@ func (d *Driver) Status() [][2]string {
 
 // GetMetadata returns metadata about the overlay driver such as the LowerDir,
 // UpperDir, WorkDir, and MergeDir used to store data.
+/*
+GetMetadata返回有关覆盖驱动程序的元数据，例如用于存储数据的LowerDir、UpperDir、WorkDir和MergeDir。
+*/
 func (d *Driver) GetMetadata(id string) (map[string]string, error) {
 	dir := d.dir(id)
 	if _, err := os.Stat(dir); err != nil {
@@ -293,6 +334,10 @@ func (d *Driver) GetMetadata(id string) (map[string]string, error) {
 // Cleanup any state created by overlay which should be cleaned when daemon
 // is being shutdown. For now, we just have to unmount the bind mounted
 // we had created.
+/*
+清除由Overlay创建的任何状态，该状态应在后台进程关闭时清除。
+现在，我们只需卸载我们创建的绑定。
+*/
 func (d *Driver) Cleanup() error {
 	return mount.RecursiveUnmount(d.home)
 }
@@ -499,6 +544,9 @@ func (d *Driver) Remove(id string) error {
 }
 
 // Get creates and mounts the required file system for the given id and returns the mount path.
+/*
+GET为给定的id创建并挂载所需的文件系统，并返回挂载路径。
+*/
 func (d *Driver) Get(id, mountLabel string) (_ containerfs.ContainerFS, retErr error) {
 	d.locker.Lock(id)
 	defer d.locker.Unlock(id)
@@ -573,6 +621,10 @@ func (d *Driver) Get(id, mountLabel string) (_ containerfs.ContainerFS, retErr e
 	// the page size. The mount syscall fails if the mount data cannot
 	// fit within a page and relative links make the mount data much
 	// smaller at the expense of requiring a fork exec to chroot.
+	/*
+	当装载数据超过页面大小时，请使用相对路径和装载自。
+	如果挂载数据不能放入页面中，并且相对链接使挂载数据小得多，则挂载syscall会失败，代价是需要fork exec来chroot。
+	*/
 	if len(mountData) > pageSize {
 		if readonly {
 			opts = indexOff + "lowerdir=" + path.Join(id, diffDirName) + ":" + string(lowers)
@@ -597,6 +649,10 @@ func (d *Driver) Get(id, mountLabel string) (_ containerfs.ContainerFS, retErr e
 	if !readonly {
 		// chown "workdir/work" to the remapped root UID/GID. Overlay fs inside a
 		// user namespace requires this to move a directory from lower to upper.
+		/*
+		将“workdir/work”更改为重新映射的根UID/GID。
+		在用户名称空间内覆盖文件系统需要这样才能将目录从较低位置移动到较高位置。
+		*/
 		if err := os.Chown(path.Join(workDir, workDirName), rootUID, rootGID); err != nil {
 			return nil, err
 		}
@@ -608,6 +664,10 @@ func (d *Driver) Get(id, mountLabel string) (_ containerfs.ContainerFS, retErr e
 // Put unmounts the mount path created for the give id.
 // It also removes the 'merged' directory to force the kernel to unmount the
 // overlay mount in other namespaces.
+/*
+PUT卸载为给定ID创建的装载路径。
+它还删除“合并”目录，以强制内核卸载其他名称空间中的覆盖挂载。
+*/
 func (d *Driver) Put(id string) error {
 	d.locker.Lock(id)
 	defer d.locker.Unlock(id)
@@ -635,6 +695,12 @@ func (d *Driver) Put(id string) error {
 	// operations to fail with ebusy.  We ignore any errors here because this may
 	// fail on older kernels which don't have
 	// torvalds/linux@8ed936b5671bfb33d89bc60bdcc7cf0470ba52fe applied.
+	/*
+	在此移除挂载点。
+	删除挂载点(在较新的内核中)将导致卸载其他挂载名称空间中此挂载的所有其他实例。
+	这对于避免另一个名称空间中存在的覆盖挂载将导致后续挂载操作失败并出现eBUSY的情况是必要的。
+	我们在这里忽略任何错误，因为这可能会在没有应用torvalds/linux@8ed936b5671bfb33d89bc60bdcc7cf0470ba52fe的旧内核上失败。
+	*/
 	if err := unix.Rmdir(mountpoint); err != nil && !os.IsNotExist(err) {
 		logger.Debugf("Failed to remove %s overlay: %v", id, err)
 	}

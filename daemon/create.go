@@ -104,6 +104,9 @@ func (daemon *Daemon) containerCreate(opts createOpts) (containertypes.Container
 }
 
 // Create creates a new container from the given configuration with a given name.
+/*
+Create从给定的配置创建一个具有给定名称的新容器。
+*/
 func (daemon *Daemon) create(opts createOpts) (retC *container.Container, retErr error) {
 	var (
 		ctr   *container.Container
@@ -141,6 +144,10 @@ func (daemon *Daemon) create(opts createOpts) (retC *container.Container, retErr
 	// ignoreImagesArgEscaped will be true) - if the image already has its arguments escaped,
 	// ensure that this is replicated across to the created container to avoid double-escaping
 	// of the arguments/command line when the runtime attempts to run the container.
+	/*
+	   在WCOW上，如果构建器未调用来创建此容器(其中IgnureImagesArgEscaped将为true)-如果映像已对其参数进行了转义，
+	请确保将其复制到创建的容器，以避免在运行时尝试运行容器时对参数/命令行进行双重转义。
+	*/
 	if os == "windows" && !opts.ignoreImagesArgsEscaped && img != nil && img.RunConfig().ArgsEscaped {
 		opts.params.Config.ArgsEscaped = true
 	}
@@ -175,6 +182,11 @@ func (daemon *Daemon) create(opts createOpts) (retC *container.Container, retErr
 	// Merge the daemon's storage options if they aren't already present. We only
 	// do this on Windows as there's no effective sandbox size limit other than
 	// physical on Linux.
+	/*
+	修复：https://github.com/moby/issues/34074和https://github.com/docker/for-win/issues/999.
+	合并守护进程的存储选项(如果它们不存在)。
+	我们只在Windows上这样做，因为除了Linux上的物理限制外，没有其他有效的沙盒大小限制。
+	*/
 	if isWindows {
 		if ctr.HostConfig.StorageOpt == nil {
 			ctr.HostConfig.StorageOpt = make(map[string]string)
@@ -188,6 +200,9 @@ func (daemon *Daemon) create(opts createOpts) (retC *container.Container, retErr
 	}
 
 	// Set RWLayer for container after mount labels have been set
+	/*
+	设置装载标签后为容器设置RWLayer
+	*/
 	rwLayer, err := daemon.imageService.CreateLayer(ctr, setupInitLayer(daemon.idMapping))
 	if err != nil {
 		return nil, errdefs.System(err)
@@ -217,6 +232,10 @@ func (daemon *Daemon) create(opts createOpts) (retC *container.Container, retErr
 	}
 	// Make sure NetworkMode has an acceptable value. We do this to ensure
 	// backwards API compatibility.
+	/*
+	确保NetworkMode具有可接受的值。
+	我们这样做是为了确保API向后兼容。
+	*/
 	runconfig.SetDefaultNetModeIfBlank(ctr.HostConfig)
 
 	daemon.updateContainerNetworkSettings(ctr, endpointsConfigs)

@@ -45,22 +45,41 @@ type InitFunc func(root string, options []string, uidMaps, gidMaps []idtools.IDM
 // interface and use the NaiveDiffDriver wrapper constructor.
 //
 // Use of ProtoDriver directly by client code is not recommended.
+/*
+ProtoDriver定义了驱动程序的基本功能。
+该接口的存在只是为了作为客户端代码的最小方法集，这些客户端代码选择不实现整个驱动程序接口，而使用NaveDiffDriver包装器构造函数。
+不建议客户端代码直接使用ProtoDriver。
+*/
 type ProtoDriver interface {
 	// String returns a string representation of this driver.
 	String() string
 	// CreateReadWrite creates a new, empty filesystem layer that is ready
 	// to be used as the storage for a container. Additional options can
 	// be passed in opts. parent may be "" and opts may be nil.
+	/*
+	CreateReadWrite创建一个新的空文件系统层，可以用作容器的存储。
+	其他选项可以在opts中传递。
+	父项可以是“，并且OPTS可以是零。
+	*/
 	CreateReadWrite(id, parent string, opts *CreateOpts) error
 	// Create creates a new, empty, filesystem layer with the
 	// specified id and parent and options passed in opts. Parent
 	// may be "" and opts may be nil.
+	/*
+	CREATE使用指定的id、父文件系统层和opts中传递的选项创建一个新的空文件系统层。
+	父项可以是“，并且OPTS可以是零。
+	*/
 	Create(id, parent string, opts *CreateOpts) error
 	// Remove attempts to remove the filesystem layer with this id.
 	Remove(id string) error
 	// Get returns the mountpoint for the layered filesystem referred
 	// to by this id. You can optionally specify a mountLabel or "".
 	// Returns the absolute path to the mounted layered filesystem.
+	/*
+	GET返回此id引用的分层文件系统的挂载点。
+	您可以选择指定装载标签或“。
+	返回装载的分层文件系统的绝对路径。
+	*/
 	Get(id, mountLabel string) (fs containerfs.ContainerFS, err error)
 	// Put releases the system resources for the specified id,
 	// e.g, unmounting layered filesystem.

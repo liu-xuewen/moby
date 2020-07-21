@@ -35,6 +35,12 @@ import (
 //  - A partial container ID prefix (e.g. short ID) of any length that is
 //    unique enough to only return a single container object
 //  If none of these searches succeed, an error is returned
+/*
+GetContainer使用提供的信息查找容器，该信息可以是调用方的以下输入之一：-完整的容器ID，
+它将与守护程序列表中的容器精确匹配-容器名称，
+它将仅通过GetByName()函数进行精确匹配-任何长度的容器ID前缀(例如短ID)，
+如果这些搜索均不成功，则返回错误，该部分容器ID前缀的唯一长度足以仅返回单个容器对象
+*/
 func (daemon *Daemon) GetContainer(prefixOrName string) (*container.Container, error) {
 	if len(prefixOrName) == 0 {
 		return nil, errors.WithStack(invalidIdentifier(prefixOrName))
@@ -46,6 +52,10 @@ func (daemon *Daemon) GetContainer(prefixOrName string) (*container.Container, e
 	}
 
 	// GetByName will match only an exact name provided; we ignore errors
+	/*
+	GetByName将仅匹配提供的确切名称；
+	我们忽略错误
+	*/
 	if containerByName, _ := daemon.GetByName(prefixOrName); containerByName != nil {
 		// prefix is an exact match to a full container Name
 		return containerByName, nil
@@ -185,6 +195,9 @@ func (daemon *Daemon) GetByName(name string) (*container.Container, error) {
 
 // newBaseContainer creates a new container with its initial
 // configuration based on the root storage from the daemon.
+/*
+newBaseContainer根据守护进程的根存储创建一个具有初始配置的新容器。
+*/
 func (daemon *Daemon) newBaseContainer(id string) *container.Container {
 	return container.NewBaseContainer(id, daemon.containerRoot(id))
 }

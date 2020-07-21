@@ -121,6 +121,9 @@ func copyAttributes(attributes, labels map[string]string) {
 }
 
 // ProcessClusterNotifications gets changes from store and add them to event list
+/*
+ProcessClusterNotitification从存储获取更改并将其添加到事件列表
+*/
 func (daemon *Daemon) ProcessClusterNotifications(ctx context.Context, watchStream chan *swarmapi.WatchMessage) {
 	for {
 		select {

@@ -7,6 +7,12 @@
 // read-only and writable layers. The exported
 // tar data for a read-only layer should match
 // the tar used to create the layer.
+/*
+包层是用于管理联合文件系统驱动程序上的只读和读写挂载的包。
+只读装载使用内容散列引用，并受到保护，使其不会在暴露的接口中发生变化。
+TAR格式用于创建只读图层并导出只读和可写图层。
+导出的只读图层的TAR数据应与用于创建该图层的TAR匹配。
+*/
 package layer // import "github.com/docker/docker/layer"
 
 import (
@@ -127,6 +133,9 @@ type RWLayer interface {
 
 	// Mount mounts the RWLayer and returns the filesystem path
 	// the to the writable layer.
+	/*
+	装载RWLayer并将文件系统路径返回到可写层。
+	*/
 	Mount(mountLabel string) (containerfs.ContainerFS, error)
 
 	// Unmount unmounts the RWLayer. This should be called
@@ -171,6 +180,10 @@ type Metadata struct {
 // writable mount. Changes made here will
 // not be included in the Tar stream of the
 // RWLayer.
+/*
+installtInit是初始化可写挂载的函数。
+此处所做的更改不会包括在RWLayer的Tar流中。
+*/
 type MountInit func(root containerfs.ContainerFS) error
 
 // CreateRWLayerOpts contains optional arguments to be passed to CreateRWLayer
@@ -233,6 +246,9 @@ func ReleaseAndLog(ls Store, l Layer) {
 
 // LogReleaseMetadata logs a metadata array, uses this to
 // ensure consistent logging for release metadata
+/*
+LogReleaseMetadata记录元数据数组，使用此数组确保发布元数据的一致日志记录
+*/
 func LogReleaseMetadata(metadatas []Metadata) {
 	for _, metadata := range metadatas {
 		logrus.Infof("Layer %s cleaned up", metadata.ChainID)

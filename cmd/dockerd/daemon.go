@@ -223,6 +223,9 @@ func (cli *DaemonCli) start(opts *daemonOptions) (err error) {
 	// Restart all autostart containers which has a swarm endpoint
 	// and is not yet running now that we have successfully
 	// initialized the cluster.
+	/*
+	重新启动所有具有群集终结点且尚未运行的自动启动容器，因为我们已经成功初始化了群集。
+	*/
 	d.RestartSwarmContainers()
 
 	logrus.Info("Daemon has completed initialization")
@@ -243,6 +246,10 @@ func (cli *DaemonCli) start(opts *daemonOptions) (err error) {
 	// The serve API routine never exits unless an error occurs
 	// We need to start it as a goroutine and wait on it so
 	// daemon doesn't exit
+	/*
+	除非发生错误，否则Serve API例程永远不会退出。
+	我们需要将其作为goroutine启动并等待，这样守护进程才不会退出
+	*/
 	serveAPIWait := make(chan error)
 	go cli.api.Wait(serveAPIWait)
 
@@ -251,6 +258,9 @@ func (cli *DaemonCli) start(opts *daemonOptions) (err error) {
 
 	// Daemon is fully initialized and handling API traffic
 	// Wait for serve API to complete
+	/*
+	后台进程已完全初始化，正在处理API流量，等待服务API完成
+	*/
 	errAPI := <-serveAPIWait
 	c.Cleanup()
 
