@@ -73,6 +73,7 @@ func (b *Backend) Build(ctx context.Context, config backend.BuildConfig) (string
 	}
 
 	var imageID = build.ImageID
+	// 默认是否Squash
 	if options.Squash {
 		if imageID, err = squashBuild(build, b.imageComponent); err != nil {
 			return "", err

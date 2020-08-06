@@ -80,6 +80,9 @@ func ParseForm(r *http.Request) error {
 
 // VersionFromContext returns an API version from the context using APIVersionKey.
 // It panics if the context value does not have version.Version type.
+//
+// VersionFromContext使用APIVersionKey从上下文返回API版本。
+// 如果上下文值没有version.Version类型，则会死机。
 func VersionFromContext(ctx context.Context) string {
 	if ctx == nil {
 		return ""

@@ -40,6 +40,9 @@ type Server struct {
 
 // New returns a new instance of the server based on the specified configuration.
 // It allocates resources which will be needed for ServeAPI(ports, unix-sockets).
+//
+// New根据指定的配置返回服务器的新实例。
+// 它分配ServeAPI(端口、Unix套接字)所需的资源。
 func New(cfg *Config) *Server {
 	return &Server{
 		cfg: cfg,

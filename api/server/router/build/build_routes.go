@@ -231,6 +231,10 @@ func (br *buildRouter) postBuild(ctx context.Context, w http.ResponseWriter, r *
 		// https://github.com/golang/go/issues/15527
 		// https://github.com/golang/go/issues/22209
 		// has been fixed
+		//
+		// 有可能在完全读取请求正文之前写入输出，因此我们需要针对它进行保护。
+		// 修复https://github.com/golang/go/issues/15527 https://github.com/golang/go/issues/22209后，可以删除此选项
+
 		body, ww = wrapOutputBufferedUntilRequestRead(body, ww)
 	}
 
@@ -245,6 +249,10 @@ func (br *buildRouter) postBuild(ctx context.Context, w http.ResponseWriter, r *
 
 		// Do not write the error in the http output if it's still empty.
 		// This prevents from writing a 200(OK) when there is an internal error.
+		//
+		// 如果http输出仍然为空，请不要在其中写入错误。
+		// 这可防止在出现内部错误时写入200(OK)。
+
 		if !output.Flushed() {
 			return err
 		}
@@ -272,6 +280,10 @@ func (br *buildRouter) postBuild(ctx context.Context, w http.ResponseWriter, r *
 
 	// Currently, only used if context is from a remote url.
 	// Look at code in DetectContextFromRemoteURL for more information.
+	//
+	// 目前，仅当上下文来自远程URL时才使用。
+	// 有关详细信息，请查看DetectContextFromRemoteURL中的代码。
+	//
 	createProgressReader := func(in io.ReadCloser) io.ReadCloser {
 		progressOutput := streamformatter.NewJSONProgressOutput(out, true)
 		return progress.NewProgressReader(in, progressOutput, r.ContentLength, "Downloading context", buildOptions.RemoteContext)
@@ -290,6 +302,7 @@ func (br *buildRouter) postBuild(ctx context.Context, w http.ResponseWriter, r *
 
 	// Everything worked so if -q was provided the output from the daemon
 	// should be just the image ID and we'll print that to stdout.
+	// 一切都正常，所以如果提供了-q，那么守护进程的输出应该只是图像ID，我们将把它打印到stdout。
 	if buildOptions.SuppressOutput {
 		_, _ = fmt.Fprintln(streamformatter.NewStdoutWriter(output), imgID)
 	}

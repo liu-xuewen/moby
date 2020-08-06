@@ -8,6 +8,7 @@ import (
 )
 
 // Backend abstracts an image builder whose only purpose is to build an image referenced by an imageID.
+// 后端抽象出一个镜像构建器，该构建器的唯一目的是构建由imageID引用的镜像。
 type Backend interface {
 	// Build a Docker image returning the id of the image
 	// TODO: make this return a reference instead of string

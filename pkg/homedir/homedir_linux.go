@@ -26,6 +26,11 @@ func GetRuntimeDir() (string, error) {
 // StickyRuntimeDir returns nil error if XDG_RUNTIME_DIR is not set.
 //
 // See also https://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
+//
+// StickRuntimeDirContents在XDG_RUNTIME_DIR下的文件上设置粘滞位，这样系统就不会定期删除这些文件。
+// StickyRuntimeDir返回粘贴文件的切片。
+// 如果未设置XDG_RUNTIME_DIR，则StickyRuntimeDir返回零错误。
+// 另请参阅https://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
 func StickRuntimeDirContents(files []string) ([]string, error) {
 	runtimeDir, err := GetRuntimeDir()
 	if err != nil {

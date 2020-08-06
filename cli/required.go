@@ -8,6 +8,7 @@ import (
 )
 
 // NoArgs validates args and returns an error if there are any args
+// NoArgs验证参数，如果有任何参数则返回错误
 func NoArgs(cmd *cobra.Command, args []string) error {
 	if len(args) == 0 {
 		return nil

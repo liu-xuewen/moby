@@ -172,7 +172,9 @@ type ImageBuildOptions struct {
 	// squash the resulting image's layers to the parent
 	// preserves the original image and creates a new one from the parent with all
 	// the changes applied to a single layer
-	Squash bool
+	//
+	// 将结果图像的图层压缩到父级将保留原始图像，并从父级创建一个新图像，并将所有更改应用于单个图层
+	Squash bool // 压缩
 	// CacheFrom specifies images that are used for matching cache. Images
 	// specified here do not need to have a valid parent chain to match cache.
 	CacheFrom   []string
@@ -205,6 +207,7 @@ const (
 	// BuilderV1 is the first generation builder in docker daemon
 	BuilderV1 BuilderVersion = "1"
 	// BuilderBuildKit is builder based on moby/buildkit project
+	// BuilderBuildKit是基于Moby/buildkit项目的构建器
 	BuilderBuildKit BuilderVersion = "2"
 )
 

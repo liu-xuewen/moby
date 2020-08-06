@@ -138,6 +138,9 @@ func (e *parseError) Unwrap() error {
 
 // Parse a Dockerfile into a collection of buildable stages.
 // metaArgs is a collection of ARG instructions that occur before the first FROM.
+//
+// 将Dockerfile解析为可构建阶段的集合。
+// metaArgs是发生在第一个FROM之前的ARG指令的集合。
 func Parse(ast *parser.Node) (stages []Stage, metaArgs []ArgCommand, err error) {
 	for _, n := range ast.Children {
 		cmd, err := ParseInstruction(n)

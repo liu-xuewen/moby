@@ -40,6 +40,9 @@ func (r *buildRouter) initRoutes() {
 // BuilderVersion derives the default docker builder version from the config
 // Note: it is valid to have BuilderVersion unset which means it is up to the
 // client to choose which builder to use.
+//
+// BuilderVersion从配置派生默认的停靠器构建器版本注意：取消设置BuilderVersion是有效的，这意味着由客户端选择使用哪个构建器。
+//
 func BuilderVersion(features map[string]bool) types.BuilderVersion {
 	var bv types.BuilderVersion
 	if v, ok := features["buildkit"]; ok {

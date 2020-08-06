@@ -189,6 +189,8 @@ func buildLabelOptions(labels map[string]string, stages []instructions.Stage) {
 
 // Build runs the Dockerfile builder by parsing the Dockerfile and executing
 // the instructions from the file.
+//
+// Build通过解析Dockerfile并执行文件中的指令来运行Dockerfile构建器。
 func (b *Builder) build(source builder.Source, dockerfile *parser.Result) (*builder.Result, error) {
 	defer b.imageSources.Unmount()
 

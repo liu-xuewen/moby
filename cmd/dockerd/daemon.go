@@ -165,6 +165,8 @@ func (cli *DaemonCli) start(opts *daemonOptions) (err error) {
 	if err != nil {
 		return errors.Wrap(err, "failed to create API server")
 	}
+	// New根据指定的配置返回服务器的新实例。
+	// 它分配ServeAPI(端口、Unix套接字)所需的资源。
 	cli.api = apiserver.New(serverConfig)
 
 	hosts, err := loadListeners(cli, serverConfig)
@@ -477,6 +479,7 @@ func initRouter(opts routerOptions) {
 
 	routers := []router.Router{
 		// we need to add the checkpoint router before the container router or the DELETE gets masked
+		// 我们需要在容器路由器或删除被屏蔽之前添加检查点路由器
 		checkpointrouter.NewRouter(opts.daemon, decoder),
 		container.NewRouter(opts.daemon, decoder),
 		image.NewRouter(opts.daemon.ImageService()),

@@ -277,6 +277,7 @@ func (conf *Config) IsValueSet(name string) bool {
 }
 
 // New returns a new fully initialized Config struct
+// New返回新的完全初始化的Config结构
 func New() *Config {
 	config := Config{}
 	config.LogConfig.Config = make(map[string]string)

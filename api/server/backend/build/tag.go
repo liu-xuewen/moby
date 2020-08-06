@@ -18,6 +18,9 @@ type Tagger struct {
 
 // NewTagger returns a new Tagger for tagging the images of a build.
 // If any of the names are invalid tags an error is returned.
+//
+// NewTagger返回用于标记构建图像的新标记器。
+// 如果任何名称是无效标记，则会返回错误。
 func NewTagger(backend ImageComponent, stdout io.Writer, names []string) (*Tagger, error) {
 	reposAndTags, err := sanitizeRepoAndTags(names)
 	if err != nil {

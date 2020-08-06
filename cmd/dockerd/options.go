@@ -77,11 +77,15 @@ func (o *daemonOptions) InstallFlags(flags *pflag.FlagSet) {
 
 // SetDefaultOptions sets default values for options after flag parsing is
 // complete
+// SetDefaultOptions在标志解析完成后设置选项的默认值
 func (o *daemonOptions) SetDefaultOptions(flags *pflag.FlagSet) {
 	// Regardless of whether the user sets it to true or false, if they
 	// specify --tlsverify at all then we need to turn on TLS
 	// TLSVerify can be true even if not set due to DOCKER_TLS_VERIFY env var, so we need
 	// to check that here as well
+	//
+	// 无论用户将其设置为TRUE还是FALSE，如果他们指定了--tlsVerify，那么我们需要打开TLS
+	// TLS即使由于DOKER_TLS_VERIFY环境变量而未设置Verify Can为TRUE，因此我们也需要在此处进行检查
 	if flags.Changed(FlagTLSVerify) || o.TLSVerify {
 		o.TLS = true
 	}

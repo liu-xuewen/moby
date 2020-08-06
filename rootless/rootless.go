@@ -16,6 +16,7 @@ var (
 )
 
 // RunningWithRootlessKit returns true if running under RootlessKit namespaces.
+// 如果在Rootless Kit命名空间下运行，则RunningWithRootless Kit返回TRUE。
 func RunningWithRootlessKit() bool {
 	runningWithRootlessKitOnce.Do(func() {
 		u := os.Getenv("ROOTLESSKIT_STATE_DIR")

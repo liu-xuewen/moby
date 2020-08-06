@@ -47,6 +47,7 @@ func getDefaultDaemonConfigFile() (string, error) {
 
 // setDefaultUmask sets the umask to 0022 to avoid problems
 // caused by custom umask
+// setDefaultUask将umask设置为0022，以避免自定义umask引起的问题
 func setDefaultUmask() error {
 	desiredUmask := 0022
 	unix.Umask(desiredUmask)
@@ -94,6 +95,8 @@ func (cli *DaemonCli) getSwarmRunRoot() string {
 
 // allocateDaemonPort ensures that there are no containers
 // that try to use any port allocated for the docker server.
+//
+// allocateDaemonPort确保没有容器试图使用分配给停靠服务器的任何端口。
 func allocateDaemonPort(addr string) error {
 	host, port, err := net.SplitHostPort(addr)
 	if err != nil {
