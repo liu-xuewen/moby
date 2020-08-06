@@ -56,6 +56,7 @@ type V1Image struct {
 	// Variant is the CPU architecture variant (presently ARM-only)
 	Variant string `json:"variant,omitempty"`
 	// OS is the operating system used to build and run the image
+	// OS是用于构建和运行映像的操作系统
 	OS string `json:"os,omitempty"`
 	// Size is the total size of the image including all layers it is composed of
 	Size int64 `json:",omitempty"`
@@ -110,6 +111,8 @@ func (img *Image) BaseImgArch() string {
 // BaseImgVariant returns the image's variant, whether populated or not.
 // This avoids creating an inconsistency where the stored image variant
 // is "greater than" (i.e. v8 vs v6) the actual image variant.
+// BaseImgVariant返回图像的变体，无论是否填充。
+// 这避免了在存储的图像变量“大于”(即，V8与V6)实际图像变量的情况下产生不一致。
 func (img *Image) BaseImgVariant() string {
 	return img.Variant
 }
@@ -143,6 +146,8 @@ func (img *Image) MarshalJSON() ([]byte, error) {
 
 // ChildConfig is the configuration to apply to an Image to create a new
 // Child image. Other properties of the image are copied from the parent.
+// ChildConfig是应用于映像以创建新的子映像的配置。
+// 图像的其他属性是从父级复制的。
 type ChildConfig struct {
 	ContainerID     string
 	Author          string
@@ -208,6 +213,7 @@ type History struct {
 
 // NewHistory creates a new history struct from arguments, and sets the created
 // time to the current time in UTC
+// NewHistory根据参数创建新的历史结构，并将创建的时间设置为UTC的当前时间
 func NewHistory(author, comment, createdBy string, isEmptyLayer bool) History {
 	return History{
 		Author:     author,

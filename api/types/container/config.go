@@ -11,6 +11,9 @@ import (
 // This is to prevent API error on time unit. For example, API may
 // set 3 as healthcheck interval with intention of 3 seconds, but
 // Docker interprets it as 3 nanoseconds.
+// MinimumDuration将用户配置的持续时间设置为最小。
+// 这是为了防止API在时间单位上出错。
+// 例如，API可能会将3设置为健康检查间隔，意图为3秒，但Docker会将其解释为3纳秒。
 const MinimumDuration = 1 * time.Millisecond
 
 // HealthConfig holds configuration settings for the HEALTHCHECK feature.
@@ -40,6 +43,11 @@ type HealthConfig struct {
 // Non-portable information *should* appear in HostConfig.
 // All fields added to this struct must be marked `omitempty` to keep getting
 // predictable hashes from the old `v1Compatibility` configuration.
+// Config包含有关容器的配置数据。
+// 它应该只保存有关容器的便携信息。
+// 在这里，“便携”意味着“独立于我们运行的主机”。
+// 非便携信息*应该*出现在HostConfig中。
+// 添加到此结构的所有字段都必须标记为`omitempty`，以保持从旧的`v1Compatibility`配置中获取可预测的哈希。
 type Config struct {
 	Hostname        string              // Hostname
 	Domainname      string              // Domainname

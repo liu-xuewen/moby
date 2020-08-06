@@ -315,7 +315,7 @@ func (c *Cluster) GetRemoteAddressList() []string {
 
 // GetWatchStream returns the channel to pass changes from store watch API
 /*
-GetWatchStream返回通道以传递来自商店监视API的更改
+GetWatchStream返回通道以传递来自store监视API的更改
 */
 func (c *Cluster) GetWatchStream() chan *swarmapi.WatchMessage {
 	c.mu.RLock()
