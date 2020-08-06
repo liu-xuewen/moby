@@ -33,6 +33,7 @@ func withLocation(err error, start, end int) error {
 }
 
 // WithLocation extends an error with a source code location
+// WithLocation使用源代码位置扩展错误 
 func WithLocation(err error, location []Range) error {
 	if err == nil {
 		return nil

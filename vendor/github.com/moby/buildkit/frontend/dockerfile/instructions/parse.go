@@ -54,6 +54,7 @@ func newParseRequestFromNode(node *parser.Node) parseRequest {
 }
 
 // ParseInstruction converts an AST to a typed instruction (either a command or a build stage beginning when encountering a `FROM` statement)
+// ParseInstruction将AST转换为类型化指令(当遇到`FROM`语句时，从命令或构建阶段开始)
 func ParseInstruction(node *parser.Node) (v interface{}, err error) {
 	defer func() {
 		err = parser.WithLocation(err, node.Location())
@@ -142,6 +143,7 @@ func (e *parseError) Unwrap() error {
 // 将Dockerfile解析为可构建阶段的集合。
 // metaArgs是发生在第一个FROM之前的ARG指令的集合。
 func Parse(ast *parser.Node) (stages []Stage, metaArgs []ArgCommand, err error) {
+	panic(111)
 	for _, n := range ast.Children {
 		cmd, err := ParseInstruction(n)
 		if err != nil {

@@ -30,6 +30,10 @@ type Source interface {
 	// Close allows to signal that the filesystem tree won't be used anymore.
 	// For Context implementations using a temporary directory, it is recommended to
 	// delete the temporary directory in Close().
+	//
+	// 关闭允许发出文件系统树将不再使用的信号。
+	// 对于使用临时目录的上下文实现，建议删除Close()中的临时目录。
+	//
 	Close() error
 	// Hash returns a checksum for a file
 	Hash(path string) (string, error)
