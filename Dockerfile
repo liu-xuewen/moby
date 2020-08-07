@@ -195,12 +195,13 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=bind,src=hack/dockerfile/install,target=/tmp/install \
         PREFIX=/build /tmp/install/install.sh proxy
 
-FROM base AS golangci_lint
-ARG GOLANGCI_LINT_COMMIT
-RUN --mount=type=cache,target=/root/.cache/go-build \
-    --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=bind,src=hack/dockerfile/install,target=/tmp/install \
-        PREFIX=/build /tmp/install/install.sh golangci_lint
+# golangci_lint 太慢了，编译去掉
+#FROM base AS golangci_lint
+#ARG GOLANGCI_LINT_COMMIT
+#RUN --mount=type=cache,target=/root/.cache/go-build \
+#    --mount=type=cache,target=/go/pkg/mod \
+#    --mount=type=bind,src=hack/dockerfile/install,target=/tmp/install \
+#        PREFIX=/build /tmp/install/install.sh golangci_lint
 
 FROM base AS gotestsum
 ARG GOTESTSUM_COMMIT
@@ -320,7 +321,7 @@ COPY --from=registry      /build/ /usr/local/bin/
 COPY --from=criu          /build/ /usr/local/
 COPY --from=vndr          /build/ /usr/local/bin/
 COPY --from=gotestsum     /build/ /usr/local/bin/
-COPY --from=golangci_lint /build/ /usr/local/bin/
+#COPY --from=golangci_lint /build/ /usr/local/bin/
 COPY --from=shfmt         /build/ /usr/local/bin/
 COPY --from=runc          /build/ /usr/local/bin/
 COPY --from=containerd    /build/ /usr/local/bin/
