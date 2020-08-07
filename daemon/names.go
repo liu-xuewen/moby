@@ -19,9 +19,11 @@ var (
 )
 
 func (daemon *Daemon) registerName(container *container.Container) error {
+	//先检查runtime中的容器list中是否存在，存在则提示错误
 	if daemon.Exists(container.ID) {
 		return fmt.Errorf("Container is already loaded")
 	}
+	//检查容器id是否为空 如果为空则说明容器是错误的，则退出返回错误
 	if err := validateID(container.ID); err != nil {
 		return err
 	}

@@ -6,6 +6,11 @@ package dockerfile // import "github.com/docker/docker/builder/dockerfile"
 //
 // See evaluator.go for a higher level discussion of the whole evaluator
 // package.
+//
+// 此文件包含每个命令的调度程序。
+// 请注意，`nullDispatch`实际上不是一个命令，但支持我们解析但不做任何操作的命令。
+// 请参阅评估器。
+// 有关整个评估器包的更高级别的讨论，请访问。
 
 import (
 	"bytes"
@@ -35,6 +40,8 @@ import (
 //
 // Sets the environment variable foo to bar, also makes interpolation
 // in the dockerfile available from the next statement on via ${foo}.
+//
+// 将环境变量foo设置为bar，还使dockerfile中的插值从VIA${foo}上的下一条语句开始可用。
 //
 func dispatchEnv(d dispatchRequest, c *instructions.EnvCommand) error {
 	runConfig := d.state.runConfig
@@ -152,6 +159,7 @@ func (d *dispatchRequest) getImageMount(imageRefOrID string) (*imageMount, error
 
 // FROM [--platform=platform] imagename[:tag | @digest] [AS build-stage-name]
 //
+// 处理第一行的FROM
 func initializeStage(d dispatchRequest, cmd *instructions.Stage) error {
 	d.builder.imageProber.Reset()
 
@@ -337,6 +345,9 @@ func dispatchWorkdir(d dispatchRequest, c *instructions.WorkdirCommand) error {
 // run a command and commit the image. Args are automatically prepended with
 // the current SHELL which defaults to 'sh -c' under linux or 'cmd /S /C' under
 // Windows, in the event there is only one argument The difference in processing:
+//
+// 运行某个命令，然后运行命令并提交映像。
+// 如果只有一个参数，即处理过程中的差异，则参数会自动优先于当前shell，在Linux中默认为‘sh-c’，在Windows中默认为‘cmd/S/C’：
 //
 // RUN echo hi          # sh -c echo hi       (Linux and LCOW)
 // RUN echo hi          # cmd /S /C echo hi   (Windows)

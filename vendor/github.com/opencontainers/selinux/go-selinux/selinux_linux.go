@@ -546,6 +546,7 @@ func ClearLabels() {
 }
 
 // ReserveLabel reserves the MLS/MCS level component of the specified label
+// Reserve veLabel保留指定标签的MLS/MCS级别组件 
 func ReserveLabel(label string) {
 	if len(label) != 0 {
 		con := strings.SplitN(label, ":", 4)

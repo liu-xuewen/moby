@@ -16,8 +16,11 @@ import (
 
 // FollowSymlinkInScope is a wrapper around evalSymlinksInScope that returns an
 // absolute path. This function handles paths in a platform-agnostic manner.
+//
+// FollowSymlinkInScope是valSymlinksInScope的包装器，它返回绝对路径。
+// 此函数以平台无关的方式处理路径。
 func FollowSymlinkInScope(path, root string) (string, error) {
-	path, err := filepath.Abs(filepath.FromSlash(path))
+	path, err := filepath.Abs(filepath.FromSlash(path)) // Slash 斜杠
 	if err != nil {
 		return "", err
 	}
@@ -36,15 +39,27 @@ func FollowSymlinkInScope(path, root string) (string, error) {
 // `path` has to contain `root` as a prefix, or else an error will be returned.
 // Trying to break out from `root` does not constitute an error.
 //
+// valSymlinksInScope将评估`root`作用域内的`path`中的符号链接，并在调用时返回保证包含在`root`作用域内的结果。
+// 不评估`root`中的符号链接，并保持原样。
+// 将返回尝试评估PATH中的符号链接时遇到的错误。
+// 不存在的路径是有效的，不会构成错误。
+// `path`必须包含`root`作为前缀，否则返回错误。
+// 尝试脱离`root`并不构成错误。
+//
 // Example:
 //   If /foo/bar -> /outside,
-//   FollowSymlinkInScope("/foo/bar", "/foo") == "/foo/outside" instead of "/outside"
+//   FollowSymlinkInScope("/foo/bar", "/foo") == "/foo/outside" instead of "/outside".
 //
 // IMPORTANT: it is the caller's responsibility to call evalSymlinksInScope *after* relevant symlinks
 // are created and not to create subsequently, additional symlinks that could potentially make a
 // previously-safe path, unsafe. Example: if /foo/bar does not exist, evalSymlinksInScope("/foo/bar", "/foo")
 // would return "/foo/bar". If one makes /foo/bar a symlink to /baz subsequently, then "/foo/bar" should
 // no longer be considered safely contained in "/foo".
+//
+// 重要提示：调用方有责任在*个相关符号链接创建后调用valSymlinksInScope*，而不是随后创建可能会使以前安全的路径不安全的额外符号链接。
+// 示例：如果/foo/bar不存在，则valSymlinksInScope(“/foo/bar”，“/foo”)将返回“/foo/bar”。
+// 如果随后使/foo/bar成为指向/baz的符号链接，则“/foo/bar”不再被认为安全地包含在“/foo”中。
+//
 func evalSymlinksInScope(path, root string) (string, error) {
 	root = filepath.Clean(root)
 	if path == root {

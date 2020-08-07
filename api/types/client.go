@@ -177,6 +177,9 @@ type ImageBuildOptions struct {
 	Squash bool // 压缩
 	// CacheFrom specifies images that are used for matching cache. Images
 	// specified here do not need to have a valid parent chain to match cache.
+	//
+	// CacheFrom指定用于匹配缓存的图像。
+	// 此处指定的图像不需要具有有效的父链即可匹配缓存。
 	CacheFrom   []string
 	SecurityOpt []string
 	ExtraHosts  []string // List of extra hosts

@@ -22,6 +22,7 @@ const (
 
 var (
 	// ErrNameReserved is an error which is returned when a name is requested to be reserved that already is reserved
+	// ErrNameReserve是请求保留已保留的名称时返回的错误
 	ErrNameReserved = errors.New("name is reserved")
 	// ErrNameNotReserved is an error which is returned when trying to find a name that is not reserved
 	ErrNameNotReserved = errors.New("name is not reserved")
@@ -29,11 +30,17 @@ var (
 
 // Snapshot is a read only view for Containers. It holds all information necessary to serve container queries in a
 // versioned ACID in-memory store.
+//
+// 快照是容器的只读视图。
+// 它在内存中的版本化ACID存储中保存服务容器查询所需的所有信息。
+//
 type Snapshot struct {
 	types.Container
 
 	// additional info queries need to filter on
 	// preserve nanosec resolution for queries
+	//
+	// 其他INFO查询需要对查询的保留纳米级分辨率进行过滤
 	CreatedAt    time.Time
 	StartedAt    time.Time
 	Name         string
@@ -151,6 +158,9 @@ func (db *memDB) withTxn(cb func(*memdb.Txn) error) error {
 
 // Save atomically updates the in-memory store state for a Container.
 // Only read only (deep) copies of containers may be passed in.
+//
+// SAVE自动更新容器的内存存储状态。
+// 只能传入容器的只读(深)副本。
 func (db *memDB) Save(c *Container) error {
 	return db.withTxn(func(txn *memdb.Txn) error {
 		return txn.Insert(memdbContainersTable, c)
@@ -178,6 +188,9 @@ func (db *memDB) Delete(c *Container) error {
 // ReserveName is idempotent
 // Attempting to reserve a container ID to a name that already exists results in an `ErrNameReserved`
 // A name reservation is globally unique
+//
+// 保留名称将容器ID注册到名称保留名称是幂等的尝试将容器ID保留给已存在的名称会导致`ErrNameReserve‘名称保留是全局唯一的
+//
 func (db *memDB) ReserveName(name, containerID string) error {
 	return db.withTxn(func(txn *memdb.Txn) error {
 		s, err := txn.First(memdbNamesTable, memdbIDIndex, name)

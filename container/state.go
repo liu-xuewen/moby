@@ -14,17 +14,24 @@ import (
 // State holds the current container state, and has methods to get and
 // set the state. Container has an embed, which allows all of the
 // functions defined against State to run against Container.
+//
+// State保存当前容器状态，并具有获取和设置状态的方法。
+// CONTAINER有一个嵌入式，它允许针对State定义的所有函数针对Container运行。
 type State struct {
 	sync.Mutex
 	// Note that `Running` and `Paused` are not mutually exclusive:
 	// When pausing a container (on Linux), the freezer cgroup is used to suspend
 	// all processes in the container. Freezing the process requires the process to
 	// be running. As a result, paused containers are both `Running` _and_ `Paused`.
+	//
+	// 需要注意的是，`Running`和`Paused`并不是互斥的：在Linux上暂停容器时，会使用Freezer cgroup来暂停容器中的所有进程。
+	// 冻结该进程需要该进程处于运行状态。
+	// 因此，暂停的容器都是`Running`_和_`Paused`。
 	Running           bool
 	Paused            bool
 	Restarting        bool
 	OOMKilled         bool
-	RemovalInProgress bool // Not need for this to be persistent on disk.
+	RemovalInProgress bool // Not need for this to be persistent on disk. // 不需要将其持久保存在磁盘上。
 	Dead              bool
 	Pid               int
 	ExitCodeValue     int    `json:"ExitCode"`
@@ -41,6 +48,10 @@ type State struct {
 // Implements exec.ExitCode interface.
 // This type is needed as State include a sync.Mutex field which make
 // copying it unsafe.
+//
+// StateStatus用于返回容器等待结果。
+// 实现exec.ExitCode接口。
+// 此类型是必需的，因为State包含使复制不安全的sync.Mutex字段。
 type StateStatus struct {
 	exitCode int
 	err      error
@@ -102,6 +113,7 @@ func (s *State) String() string {
 }
 
 // IsValidHealthString checks if the provided string is a valid container health status or not.
+// IsValidHealthString检查提供的字符串是否为有效的容器健康状态。
 func IsValidHealthString(s string) bool {
 	return s == types.Starting ||
 		s == types.Healthy ||
@@ -110,6 +122,7 @@ func IsValidHealthString(s string) bool {
 }
 
 // StateString returns a single string to describe state
+// StateString返回描述状态的单个字符串
 func (s *State) StateString() string {
 	if s.Running {
 		if s.Paused {
@@ -137,6 +150,7 @@ func (s *State) StateString() string {
 }
 
 // IsValidStateString checks if the provided string is a valid container state or not.
+// IsValidStateString检查提供的字符串是否为有效的容器状态。
 func IsValidStateString(s string) bool {
 	if s != "paused" &&
 		s != "restarting" &&
@@ -151,6 +165,7 @@ func IsValidStateString(s string) bool {
 }
 
 // WaitCondition is an enum type for different states to wait for.
+// WaitCondition是不同州等待的枚举类型。
 type WaitCondition int
 
 // Possible WaitCondition Values.
@@ -164,6 +179,14 @@ type WaitCondition int
 // or is removed.
 //
 // WaitConditionRemoved is used to wait for the container to be removed.
+//
+// 可能的WaitCondition值。
+//
+// WaitConditionNotRunning(默认值)用于等待任何非运行状态：“Created”、“Exted”、“Dead”、“Removing”或“Remove”。
+// WaitConditionNextExit用于等待下次状态变为非运行状态。
+// 如果状态当前为“CREATED”或“EXITED”，这将导致WAIT()阻塞，直到容器运行并退出或被删除。
+//
+// WaitConditionRemoved用于等待容器被移除。
 const (
 	WaitConditionNotRunning WaitCondition = iota
 	WaitConditionNextExit
@@ -178,12 +201,20 @@ const (
 // be nil and its ExitCode() method will return the container's exit code,
 // otherwise, the results Err() method will return an error indicating why the
 // wait operation failed.
+//
+// 等待，直到容器处于给定条件指示的特定状态。
+// 必须使用上下文来取消请求、控制超时和避免Goroutine泄漏。
+// 必须在不持有状态锁的情况下调用Wait。
+// 返回调用方将从中接收结果的通道。
+// 如果容器自己退出，则结果的err()方法将为空，其ExitCode()方法将返回容器的退出代码，否则，结果err()方法将返回错误，指示等待操作失败的原因。
+//
 func (s *State) Wait(ctx context.Context, condition WaitCondition) <-chan StateStatus {
 	s.Lock()
 	defer s.Unlock()
 
 	if condition == WaitConditionNotRunning && !s.Running {
 		// Buffer so we can put it in the channel now.
+		// 缓冲器，这样我们现在就可以把它放进频道了。
 		resultC := make(chan StateStatus, 1)
 
 		// Send the current status.
@@ -197,6 +228,7 @@ func (s *State) Wait(ctx context.Context, condition WaitCondition) <-chan StateS
 
 	// If we are waiting only for removal, the waitStop channel should
 	// remain nil and block forever.
+	// 如果我们只等待删除，waitStop通道应该永远保持为空并阻塞。
 	var waitStop chan struct{}
 	if condition < WaitConditionRemoved {
 		waitStop = s.waitStop
@@ -205,6 +237,8 @@ func (s *State) Wait(ctx context.Context, condition WaitCondition) <-chan StateS
 	// Always wait for removal, just in case the container gets removed
 	// while it is still in a "created" state, in which case it is never
 	// actually stopped.
+	//
+	// 始终等待移除，以防容器在仍处于“已创建”状态时被移除，在这种情况下，它实际上永远不会停止。
 	waitRemove := s.waitRemove
 
 	resultC := make(chan StateStatus)

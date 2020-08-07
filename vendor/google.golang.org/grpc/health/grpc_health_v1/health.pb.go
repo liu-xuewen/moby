@@ -175,6 +175,9 @@ const _ = grpc.SupportPackageIsVersion4
 // HealthClient is the client API for Health service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+// HealthClient是Health服务的客户端API。
+// 有关ctx使用和关闭/结束流RPC的语义，请参考https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+//
 type HealthClient interface {
 	// If the requested service is unknown, the call will fail with status
 	// NOT_FOUND.
@@ -194,6 +197,15 @@ type HealthClient interface {
 	// should assume this method is not supported and should not retry the
 	// call.  If the call terminates with any other status (including OK),
 	// clients should retry the call with appropriate exponential backoff.
+	//
+	// 对请求的服务的服务状态执行监视。
+	// 服务器将立即发回指示当前服务状态的消息。
+	// 然后，每当服务的服务状态改变时，它将随后发送一条新消息。
+	// 如果接收到呼叫时所请求的服务是未知的，则服务器将发送一条消息，将服务状态设置为SERVICE_UNKNOWN，但不会终止呼叫。
+	// 如果在将来某个时刻，服务的服务状态变得已知，服务器将发送带有服务服务状态的新消息。
+	// 如果调用以未实现状态终止，则客户端应假定此方法不受支持，并且不应重试调用。
+	// 如果呼叫以任何其他状态(包括OK)终止，客户端应使用适当的指数退避重试呼叫。
+	//
 	Watch(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (Health_WatchClient, error)
 }
 

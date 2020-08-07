@@ -7,6 +7,7 @@ import (
 )
 
 // MakeImageCache creates a stateful image cache.
+// MakeImageCache创建状态Image缓存。
 func (i *ImageService) MakeImageCache(sourceRefs []string) builder.ImageCache {
 	if len(sourceRefs) == 0 {
 		return cache.NewLocal(i.imageStore)

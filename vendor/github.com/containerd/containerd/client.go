@@ -79,6 +79,8 @@ func init() {
 
 // New returns a new containerd client that is connected to the containerd
 // instance provided by address
+// New返回连接到Address提供的Containerd实例的新Containerd客户端
+//
 func New(address string, opts ...ClientOpt) (*Client, error) {
 	var copts clientOpts
 	for _, o := range opts {
@@ -169,6 +171,7 @@ func New(address string, opts ...ClientOpt) (*Client, error) {
 
 // NewWithConn returns a new containerd client that is connected to the containerd
 // instance provided by the connection
+// NewWithConn返回一个新的容器d客户端，该客户端连接到连接提供的容器d实例
 func NewWithConn(conn *grpc.ClientConn, opts ...ClientOpt) (*Client, error) {
 	var copts clientOpts
 	for _, o := range opts {
@@ -231,6 +234,11 @@ func (c *Client) Reconnect() error {
 // This call will block if a transient error is encountered during
 // connection. A timeout can be set in the context to ensure it returns
 // early.
+//
+// 如果客户端可以成功连接到containerd守护进程，并且运行状况检查服务返回服务响应，则IsServing返回TRUE。
+// 如果在连接期间遇到暂时性错误，则此调用将被阻塞。
+// 可以在上下文中设置超时以确保其提前返回。
+//
 func (c *Client) IsServing(ctx context.Context) (bool, error) {
 	c.connMu.Lock()
 	if c.conn == nil {

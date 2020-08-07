@@ -135,6 +135,9 @@ func (p *JSONProgress) width() int {
 // JSONMessage defines a message struct. It describes
 // the created time, where it from, status, ID of the
 // message. It's used for docker events.
+// JSONMessage定义了一个消息结构。
+// 它描述了消息的创建时间、发件人、状态、ID。
+// 它用于码头活动。
 type JSONMessage struct {
 	Stream          string        `json:"stream,omitempty"`
 	Status          string        `json:"status,omitempty"`

@@ -134,11 +134,13 @@ func (out *progressOutput) WriteProgress(prog progress.Progress) error {
 }
 
 // AuxFormatter is a streamFormatter that writes aux progress messages
+// AuxForMatter是编写AUX进度消息的StreamForMatter
 type AuxFormatter struct {
 	io.Writer
 }
 
 // Emit emits the given interface as an aux progress message
+// 发出将给定接口作为辅助进度消息发出
 func (sf *AuxFormatter) Emit(id string, aux interface{}) error {
 	auxJSONBytes, err := json.Marshal(aux)
 	if err != nil {

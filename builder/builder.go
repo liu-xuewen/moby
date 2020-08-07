@@ -90,9 +90,16 @@ type ImageCacheBuilder interface {
 
 // ImageCache abstracts an image cache.
 // (parent image, child runconfig) -> child image
+//
+// ImageCache抽象图像缓存。
+// (父映像、子映像运行配置)->子映像
 type ImageCache interface {
 	// GetCache returns a reference to a cached image whose parent equals `parent`
 	// and runconfig equals `cfg`. A cache miss is expected to return an empty ID and a nil error.
+	//
+	// GetCache返回父地址为`parent`、runconfig地址为`cfg`的缓存镜像的引用。
+	// 缓存未命中预计将返回空ID和零错误。
+	//
 	GetCache(parentID string, cfg *container.Config) (imageID string, err error)
 }
 

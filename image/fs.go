@@ -87,6 +87,7 @@ func (s *fs) Walk(f DigestWalkFunc) error {
 }
 
 // Get returns the content stored under a given digest.
+// GET返回存储在给定摘要下的内容。
 func (s *fs) Get(dgst digest.Digest) ([]byte, error) {
 	s.RLock()
 	defer s.RUnlock()

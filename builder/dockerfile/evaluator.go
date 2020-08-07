@@ -6,17 +6,31 @@
 // experience for execution purposes only. Parsing is controlled in the parser
 // package, and this division of responsibility should be respected.
 //
+// 包dockerfile是Dockerfile解析/评估管道中的评估步骤。
+// 它结合了一个基于解析器的调度表。
+// 解析器本身生成的节点值(有关更多信息，请参见解析器包)。
+// 使用BuildOpts结构调用newBuilder可用于自定义仅用于执行目的的体验。
+// 解析在解析器包中进行控制，这种职责分工应该得到尊重。
+//
 // Please see the jump table targets for the actual invocations, most of which
 // will call out to the functions in internals.go to deal with their tasks.
 //
 // ONBUILD is a special case, which is covered in the onbuild() func in
 // dispatchers.go.
 //
+// 请看实际调用的跳转表目标，其中大部分将调用internals.go中的函数来处理它们的任务。
+// ONBUILD是一个特例，Dispatchers.Go中的onbuild()函数介绍了这一点。
+//
 // The evaluator uses the concept of "steps", which are usually each processable
 // line in the Dockerfile. Each step is numbered and certain actions are taken
 // before and after each step, such as creating an image ID and removing temporary
 // containers and images. Note that ONBUILD creates a kinda-sorta "sub run" which
 // includes its own set of steps (usually only one of them).
+//
+// 计算器使用“步骤”的概念，通常是Dockerfile中的每个可处理行。
+// 每一步都有编号，并在每一步前后执行某些操作，例如创建镜像ID和删除临时容器和镜像。
+// 注意，ONBUILD创建了一个类似于“子运行”的“子运行”，其中包括它自己的一组步骤(通常只有一个)。
+//
 package dockerfile // import "github.com/docker/docker/builder/dockerfile"
 
 import (
@@ -208,6 +222,7 @@ func (s *dispatchState) updateRunConfig() {
 }
 
 // hasFromImage returns true if the builder has processed a `FROM <image>` line
+// 如果构建器处理了`From<image>`行，则hasFromImage返回TRUE
 func (s *dispatchState) hasFromImage() bool {
 	return s.imageID != "" || (s.baseImage != nil && s.baseImage.ImageID() == "")
 }

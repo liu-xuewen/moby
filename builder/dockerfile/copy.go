@@ -550,6 +550,7 @@ func copyDirectory(archiver Archiver, source, dest *copyEndpoint, identity *idto
 }
 
 func copyFile(archiver Archiver, source, dest *copyEndpoint, identity *idtools.Identity) error {
+	// 只支持两种操作系统
 	if runtime.GOOS == "windows" && dest.driver.OS() == "linux" {
 		// LCOW
 		if err := dest.driver.MkdirAll(dest.driver.Dir(dest.path), 0755); err != nil {

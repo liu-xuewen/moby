@@ -81,6 +81,14 @@ func (b *Builder) commit(dispatchState *dispatchState, comment string) error {
 	if b.disableCommit {
 		return nil
 	}
+	/*
+	FROM busybox
+	ENV foo /bar
+	WORKDIR ${foo}   # WORKDIR /bar
+	ADD . $foo       # ADD . /bar
+	COPY \$foo /quux # COPY $foo /quux
+	*/
+	// 先执行FROM
 	if !dispatchState.hasFromImage() {
 		return errors.New("Please provide a source image with `from` prior to commit")
 	}
@@ -196,6 +204,9 @@ func (b *Builder) performCopy(req dispatchRequest, inst copyInstruction) error {
 	// if a chown was requested, perform the steps to get the uid, gid
 	// translated (if necessary because of user namespaces), and replace
 	// the root pair with the chown pair for copy operations
+	//
+	// 如果请求chown，请执行步骤以转换uid和gid(如果出于用户命名空间的原因，如有必要)，并将根对替换为chown对以执行复制操作
+	//
 	if inst.chownStr != "" {
 		identity, err = parseChownFlag(b, state, inst.chownStr, destInfo.root.Path(), b.idMapping)
 		if err != nil {
@@ -225,6 +236,8 @@ func (b *Builder) performCopy(req dispatchRequest, inst copyInstruction) error {
 func createDestInfo(workingDir string, inst copyInstruction, rwLayer builder.RWLayer, platform string) (copyInfo, error) {
 	// Twiddle the destination when it's a relative path - meaning, make it
 	// relative to the WORKINGDIR
+	//
+	// 当目的地是相对路径时旋转目的地-意思是，使其相对于WORKINGDIR
 	dest, err := normalizeDest(workingDir, inst.dest, platform)
 	if err != nil {
 		return copyInfo{}, errors.Wrapf(err, "invalid %s", inst.cmdName)
@@ -235,6 +248,7 @@ func createDestInfo(workingDir string, inst copyInstruction, rwLayer builder.RWL
 
 // normalizeDest normalises the destination of a COPY/ADD command in a
 // platform semantically consistent way.
+// NormizeDest以平台语义一致的方式标准化Copy/Add命令的目的地。
 func normalizeDest(workingDir, requested string, platform string) (string, error) {
 	dest := fromSlash(requested, platform)
 	endsInSlash := strings.HasSuffix(dest, string(separator(platform)))

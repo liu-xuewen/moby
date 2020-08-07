@@ -21,6 +21,7 @@ type Annotations struct {
 }
 
 // Driver represents a driver (network, logging, secrets backend).
+// Driver代表一个驱动程序(网络、日志、机密后端)。
 type Driver struct {
 	Name    string            `json:",omitempty"`
 	Options map[string]string `json:",omitempty"`

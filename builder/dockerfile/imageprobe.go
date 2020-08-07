@@ -8,6 +8,10 @@ import (
 
 // ImageProber exposes an Image cache to the Builder. It supports resetting a
 // cache.
+//
+// ImageProber向生成器公开Image缓存。
+// 它支持重置缓存。
+//
 type ImageProber interface {
 	Reset()
 	Probe(parentID string, runConfig *container.Config) (string, error)
@@ -37,6 +41,10 @@ func (c *imageProber) Reset() {
 
 // Probe checks if cache match can be found for current build instruction.
 // It returns the cachedID if there is a hit, and the empty string on miss
+//
+// 探测检查是否可以找到当前生成指令的缓存匹配。
+// 如果命中，则返回cachedID，如果未命中，则返回空字符串
+//
 func (c *imageProber) Probe(parentID string, runConfig *container.Config) (string, error) {
 	if c.cacheBusted {
 		return "", nil

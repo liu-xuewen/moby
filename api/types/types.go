@@ -18,6 +18,7 @@ import (
 )
 
 // RootFS returns Image's RootFS description including the layer IDs.
+// RootFS返回Image的RootFS描述，包括层ID。
 type RootFS struct {
 	Type      string
 	Layers    []string `json:",omitempty"`
@@ -56,6 +57,7 @@ type ImageMetadata struct {
 
 // Container contains response of Engine API:
 // GET "/containers/json"
+// 容器包含引擎接口的响应：get“/containers/json”
 type Container struct {
 	ID         string `json:"Id"`
 	Names      []string

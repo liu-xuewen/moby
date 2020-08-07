@@ -46,11 +46,14 @@ import (
 const configFileName = "config.v2.json"
 
 // ExitStatus provides exit reasons for a container.
+// ExitStatus提供容器的退出原因。
 type ExitStatus struct {
 	// The exit code with which the container exited.
+	// 容器退出时使用的退出代码。
 	ExitCode int
 
 	// Whether the container encountered an OOM.
+	// 容器是否遇到OOM。
 	OOMKilled bool
 
 	// Time at which the container died
@@ -58,9 +61,11 @@ type ExitStatus struct {
 }
 
 // Container holds the structure defining a container object.
+// 容器包含定义容器对象的结构。
 type Container struct {
 	StreamConfig *stream.Config
 	// embed for Container to support states directly.
+	// 嵌入以供容器直接支持状态。
 	*State          `json:"State"`          // Needed for Engine API version <= 1.11
 	Root            string                  `json:"-"` // Path to the "home" of the container, including metadata.
 	BaseFS          containerfs.ContainerFS `json:"-"` // interface containing graphdriver mount
@@ -116,6 +121,8 @@ type localLogCacheMeta struct {
 
 // NewBaseContainer creates a new container with its
 // basic configuration.
+//
+// NewBaseContainer使用其基本配置创建一个新容器。
 func NewBaseContainer(id, root string) *Container {
 	return &Container{
 		ID:            id,
@@ -129,7 +136,9 @@ func NewBaseContainer(id, root string) *Container {
 }
 
 // FromDisk loads the container configuration stored in the host.
+// FromDisk加载存储在主机中的容器配置。
 func (container *Container) FromDisk() error {
+	// ConfigPath返回容器的JSON配置的路径
 	pth, err := container.ConfigPath()
 	if err != nil {
 		return err
@@ -151,10 +160,14 @@ func (container *Container) FromDisk() error {
 	// Ensure the operating system is set if blank. Assume it is the OS of the
 	// host OS if not, to ensure containers created before multiple-OS
 	// support are migrated
+	//
+	// 如果为空，请确保操作系统已设置。
+	// 如果不是，则假定它是主机操作系统的操作系统，以确保在迁移多操作系统支持之前创建的容器
 	if container.OS == "" {
 		container.OS = runtime.GOOS
 	}
 
+	// Decode(&container.HostConfig)
 	return container.readHostConfig()
 }
 
@@ -194,6 +207,9 @@ func (container *Container) toDisk() (*Container, error) {
 
 // CheckpointTo makes the Container's current state visible to queries, and persists state.
 // Callers must hold a Container lock.
+//
+// CheckpointTo使容器的当前状态对查询可见，并保持状态。
+// 调用方必须持有容器锁。
 func (container *Container) CheckpointTo(store ViewDB) error {
 	deepCopy, err := container.toDisk()
 	if err != nil {
@@ -203,11 +219,17 @@ func (container *Container) CheckpointTo(store ViewDB) error {
 }
 
 // readHostConfig reads the host configuration from disk for the container.
+//
+// readHostConfig从磁盘读取容器的主机配置。
 func (container *Container) readHostConfig() error {
 	container.HostConfig = &containertypes.HostConfig{}
 	// If the hostconfig file does not exist, do not read it.
 	// (We still have to initialize container.HostConfig,
 	// but that's OK, since we just did that above.)
+	//
+	// 如果hostconfig文件不存在，请不要读取它。
+	// (我们仍然需要初始化Container.HostConfig，但这没问题，因为我们刚刚在上面完成了这项工作。)
+
 	pth, err := container.HostConfigPath()
 	if err != nil {
 		return err
@@ -333,9 +355,21 @@ func (container *Container) GetResourcePath(path string) (string, error) {
 //       if no component of the returned path changes (such as a component
 //       symlinking to a different path) between using this method and using the
 //       path. See symlink.FollowSymlinkInScope for more details.
+//
+// GetRootResourcePath计算容器根范围内的`path`，并进行适当的路径清理。
+// 符号链接的作用域都是容器的根，就好像容器的根是`/`一样。
+// 容器的根是面向主机的配置元数据目录。
+// 此方法仅用于安全访问容器的`tainer.json`或其他元数据文件。
+// 如果有疑问，请使用tainer.GetResourcePath。
+// 注意：如果在使用此方法和使用路径之间没有返回路径的组件(如符号链接到不同路径的组件)发生更改，则返回路径的作用域*只有*安全地限定在容器的根目录内。
+// 有关更多详细信息，请参见symlink.FollowSymlinkInScope。
+//
 func (container *Container) GetRootResourcePath(path string) (string, error) {
 	// IMPORTANT - These are paths on the OS where the daemon is running, hence
 	// any filepath operations must be done in an OS agnostic way.
+	//
+	// 重要提示-这些是运行守护程序的操作系统上的路径，因此任何文件路径操作都必须以与操作系统无关的方式完成。
+
 	cleanPath := filepath.Join(string(os.PathSeparator), path)
 	return symlink.FollowSymlinkInScope(filepath.Join(container.Root, cleanPath), container.Root)
 }
@@ -352,6 +386,7 @@ func (container *Container) HostConfigPath() (string, error) {
 }
 
 // ConfigPath returns the path to the container's JSON config
+// ConfigPath返回容器的JSON配置的路径
 func (container *Container) ConfigPath() (string, error) {
 	return container.GetRootResourcePath(configFileName)
 }
@@ -548,6 +583,11 @@ func (container *Container) StopTimeout() int {
 // we remove that behavior for good.
 // See https://github.com/docker/docker/pull/17779
 // for a more detailed explanation on why we don't want that.
+//
+// InitDNSHostConfig确保DNS字段永远不为零。
+// 新容器永远不会有那些nil字段，但是预先创建的容器仍然可以有那些nil值。
+// Start API中不推荐的主机配置可能会使这些字段再次为空，这会纠正该问题，直到我们永久删除该行为。
+// 有关我们为什么不希望这样做的详细解释，请参阅https://github.com/docker/docker/pull/17779。
 func (container *Container) InitDNSHostConfig() {
 	container.Lock()
 	defer container.Unlock()

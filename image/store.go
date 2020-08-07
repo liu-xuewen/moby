@@ -203,6 +203,10 @@ func (is *store) Search(term string) (ID, error) {
 func (is *store) Get(id ID) (*Image, error) {
 	// todo: Check if image is in images
 	// todo: Detect manual insertions and start using them
+	// 待办事项：检查图像是否在图像中
+	// 待办事项：检测手动插入并开始使用它们
+
+	// GET返回存储在给定摘要下的内容。
 	config, err := is.fs.Get(id.Digest())
 	if err != nil {
 		return nil, err

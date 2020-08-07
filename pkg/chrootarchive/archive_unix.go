@@ -87,6 +87,8 @@ func invokeUnpack(decompressedArchive io.Reader, dest string, options *archive.T
 		dest = relDest
 	}
 
+	// reexec.Register("docker-untar", untar)
+	// 还是执行的docker-server中的docker-untar
 	cmd := reexec.Command("docker-untar", dest, root)
 	cmd.Stdin = decompressedArchive
 

@@ -203,7 +203,7 @@ func (daemon *Daemon) RegistryHosts() docker.RegistryHosts {
 
 	return resolver.NewRegistryConfig(m)
 }
-
+// 读取/var/lib/docker/containers目录下的所有文件夹（实际就是所有之前运行过的容器的目录，目录名为对应容器的id）
 func (daemon *Daemon) restore() error {
 	var mapLock sync.Mutex
 	containers := make(map[string]*container.Container)
@@ -220,6 +220,10 @@ func (daemon *Daemon) restore() error {
 	// (128) was chosen after some fairly significant benchmarking -- don't change
 	// it unless you've tested it significantly (this value is adjusted if
 	// RLIMIT_NOFILE is small to avoid EMFILE).
+	//
+	// parallelLimit是我们允许的并行启动作业的最大数量(这是用于所有启动信号量的限制)。
+	// 乘法器(128)是在一些相当重要的基准测试之后选择的--除非您进行了重要的测试，否则不要更改它(如果RLIMIT_NOFILE较小，则会调整此值以避免EMFILE)。
+	//
 	parallelLimit := adjustParallelLimit(len(dir), 128*runtime.NumCPU())
 
 	// Re-used for all parallel startup jobs.
@@ -243,6 +247,7 @@ func (daemon *Daemon) restore() error {
 				return
 			}
 			// Ignore the container if it does not support the current driver being used by the graph
+			// 如果容器不支持图形使用的当前驱动程序，则忽略该容器
 			currentDriverForContainerOS := daemon.graphDrivers[container.OS]
 			if (container.Driver == "" && currentDriverForContainerOS == "aufs") || container.Driver == currentDriverForContainerOS {
 				rwlayer, err := daemon.imageService.GetLayerByID(container.ID, container.OS)
@@ -281,6 +286,7 @@ func (daemon *Daemon) restore() error {
 				mapLock.Unlock()
 				return
 			}
+			//最后将加载的容器注册到runtime中的容器list中去，具体流程如下
 			if err := daemon.Register(c); err != nil {
 				logrus.Errorf("Failed to register container %s: %s", c.ID, err)
 				mapLock.Lock()
@@ -292,6 +298,11 @@ func (daemon *Daemon) restore() error {
 			// The LogConfig.Type is empty if the container was created before docker 1.12 with default log driver.
 			// We should rewrite it to use the daemon defaults.
 			// Fixes https://github.com/docker/docker/issues/22536
+			//
+			// 如果容器是在docker 1.12之前使用默认日志驱动程序创建的，则LogConfig.Type为空。
+			// 我们应该重写它以使用守护程序默认值。
+			// 修复https://github.com/docker/docker/issues/22536
+			//
 			if c.HostConfig.LogConfig.Type == "" {
 				if err := daemon.mergeAndVerifyLogConfig(&c.HostConfig.LogConfig); err != nil {
 					logrus.Errorf("Failed to verify log config for container %s: %q", c.ID, err)
@@ -349,6 +360,7 @@ func (daemon *Daemon) restore() error {
 			}
 
 			if c.IsRunning() || c.IsPaused() {
+				// 手动启动容器，因为有些容器需要等待群集联网
 				c.RestartManager().Cancel() // manually start containers because some need to wait for swarm networking
 
 				if c.IsPaused() && alive {
@@ -392,6 +404,7 @@ func (daemon *Daemon) restore() error {
 				}
 
 				// we call Mount and then Unmount to get BaseFs of the container
+				// 我们调用mount，然后unmount来获取容器的BaseF
 				if err := daemon.Mount(c); err != nil {
 					// The mount is unlikely to fail. However, in case mount fails
 					// the container should be allowed to restore here. Some functionalities
@@ -399,6 +412,13 @@ func (daemon *Daemon) restore() error {
 					// stopped/restarted/removed.
 					// See #29365 for related information.
 					// The error is only logged here.
+					//
+					// 安装不太可能失败。
+					// 但是，如果挂载失败，应允许容器在此处恢复。
+					// 某些功能(如docker exec-u用户)可能会丢失，但容器可以停止/重新启动/删除。
+					// 有关信息，请参阅#29365。
+					// 此处仅记录错误。
+					//
 					logrus.Warnf("Failed to mount container on getting BaseFs path %v: %v", c.ID, err)
 				} else {
 					if err := daemon.Unmount(c); err != nil {
@@ -426,6 +446,9 @@ func (daemon *Daemon) restore() error {
 			// not initialized yet. We will start
 			// it after the cluster is
 			// initialized.
+			//
+			// 获取我们需要重新启动的容器列表不要自动启动在集群范围网络中有端点的容器，因为集群还没有初始化。
+			// 我们将在群集初始化后启动它。
 			if daemon.configStore.AutoRestart && c.ShouldRestart() && !c.NetworkSettings.HasSwarmEndpoint && c.HasBeenStartedBefore {
 				mapLock.Lock()
 				restartContainers[c] = make(chan struct{})
@@ -446,6 +469,11 @@ func (daemon *Daemon) restore() error {
 				// associated volumes, network links or both to also
 				// be removed. So we put the container in the "dead"
 				// state and leave further processing up to them.
+				//
+				// 我们可能在搬运过程中坠毁了，重置旗帜。
+				// 我们在这里不删除容器，因为我们不知道用户是否请求也删除关联的卷、网络链接或两者。
+				// 因此，我们将容器置于“死”状态，并将进一步处理留给它们。
+				//
 				logrus.Debugf("Resetting RemovalInProgress flag from %v", c.ID)
 				c.RemovalInProgress = false
 				c.Dead = true
@@ -731,6 +759,7 @@ func NewDaemon(ctx context.Context, config *config.Config, pluginStore *plugin.S
 	}
 
 	// Ensure that we have a correct root key limit for launching containers.
+	// 确保我们具有正确的启动容器的根密钥限制。
 	if err := ModifyRootKeyLimit(); err != nil {
 		logrus.Warnf("unable to modify root key limit, number of containers could be limited by this quota: %v", err)
 	}
@@ -1069,6 +1098,9 @@ func NewDaemon(ctx context.Context, config *config.Config, pluginStore *plugin.S
 
 	// Discovery is only enabled when the daemon is launched with an address to advertise.  When
 	// initialized, the daemon is registered and we can store the discovery backend as it's read-only
+	//
+	// 仅当使用要通告的地址启动守护程序时，才会启用发现。
+	// 初始化时，守护程序已注册，我们可以将发现后端存储为只读
 	if err := d.initDiscovery(config); err != nil {
 		return nil, err
 	}
@@ -1315,6 +1347,7 @@ func (daemon *Daemon) Mount(container *container.Container) error {
 }
 
 // Unmount unsets the container base filesystem
+// 卸载取消设置基于容器的文件系统
 func (daemon *Daemon) Unmount(container *container.Container) error {
 	if container.RWLayer == nil {
 		return errors.New("RWLayer of container " + container.ID + " is unexpectedly nil")

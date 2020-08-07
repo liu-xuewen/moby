@@ -168,6 +168,7 @@ func (archiver *Archiver) CopyFileWithTar(src, dst string) (retErr error) {
 		}()
 	}()
 	defer func() {
+		// 用ch接收goroutine的err
 		if err := <-errC; retErr == nil && err != nil {
 			retErr = err
 		}

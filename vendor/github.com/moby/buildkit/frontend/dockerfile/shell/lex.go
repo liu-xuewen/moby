@@ -30,6 +30,7 @@ func NewLex(escapeToken rune) *Lex {
 
 // ProcessWord will use the 'env' list of environment variables,
 // and replace any env var references in 'word'.
+// ProcessWord将使用环境变量的‘env’列表，并替换‘word’中的任何env变量引用。
 func (s *Lex) ProcessWord(word string, env []string) (string, error) {
 	word, _, err := s.process(word, BuildEnvs(env))
 	return word, err
@@ -133,6 +134,8 @@ func (w *wordsStruct) getWords() []string {
 
 // Process the word, starting at 'pos', and stop when we get to the
 // end of the word or the 'stopChar' character
+//
+// 处理单词，从‘pos’开始，当我们到达单词或‘stopChar’字符的末尾时停止 
 func (sw *shellWord) processStopOn(stopChar rune) (string, []string, error) {
 	var result bytes.Buffer
 	var words wordsStruct

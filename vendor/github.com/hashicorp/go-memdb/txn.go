@@ -53,6 +53,7 @@ func (txn *Txn) readableIndex(table, index string) *iradix.Txn {
 
 // writableIndex returns a transaction usable for modifying the
 // given index in a table.
+// WritableIndex返回表中可用于修改给定索引的事务。 
 func (txn *Txn) writableIndex(table, index string) *iradix.Txn {
 	if txn.modified == nil {
 		txn.modified = make(map[tableIndex]*iradix.Txn)
@@ -135,6 +136,7 @@ func (txn *Txn) Commit() {
 }
 
 // Insert is used to add or update an object into the given table
+// INSERT用于将对象添加或更新到给定表中
 func (txn *Txn) Insert(table string, obj interface{}) error {
 	if !txn.write {
 		return fmt.Errorf("cannot insert in read-only transaction")
@@ -158,12 +160,17 @@ func (txn *Txn) Insert(table string, obj interface{}) error {
 	}
 
 	// Lookup the object by ID first, to see if this is an update
+	// 首先按ID查找对象，查看这是否是更新
 	idTxn := txn.writableIndex(table, id)
 	existing, update := idTxn.Get(idVal)
 
 	// On an update, there is an existing object with the given
 	// primary ID. We do the update by deleting the current object
 	// and inserting the new object.
+	//
+	// 在更新时，存在具有给定主ID的现有对象。
+	// 我们通过删除当前对象并插入新对象来执行更新。
+	//
 	for name, indexSchema := range tableSchema.Indexes {
 		indexTxn := txn.writableIndex(table, name)
 
@@ -188,6 +195,10 @@ func (txn *Txn) Insert(table string, obj interface{}) error {
 		// Handle non-unique index by computing a unique index.
 		// This is done by appending the primary key which must
 		// be unique anyways.
+		//
+		// 通过计算唯一索引来处理非唯一索引。
+		// 这是通过附加主键来实现的，主键无论如何都必须是唯一的。
+		//
 		if ok && !indexSchema.Unique {
 			for i := range vals {
 				vals[i] = append(vals[i], idVal...)
@@ -217,6 +228,9 @@ func (txn *Txn) Insert(table string, obj interface{}) error {
 					// Handle non-unique index by computing a unique index.
 					// This is done by appending the primary key which must
 					// be unique anyways.
+					// 通过计算唯一索引来处理非唯一索引。  
+					// 这是通过附加主键来实现的，主键无论如何都必须是唯一的。  
+
 					if !indexSchema.Unique {
 						valExist = append(valExist, idVal...)
 					}

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// A digest is just a hash.
+
 package digest
 
 import (
@@ -33,6 +35,11 @@ import (
 //
 // This allows to abstract the digest behind this type and work only in those
 // terms.
+//
+// 摘要允许以算法为前缀的十六进制格式的摘要字符串的简单保护。
+// Digest类型的字符串在某种程度上保证格式正确，并且它提供了对摘要字符串组件的快速访问。
+// 下面是摘要类型内容的示例：sha256:7173b809ca12ec5dee4506cd86be934c4596dd234ee82c0662eac04a8c2c71dc这允许抽象此类型背后的摘要，并且只在这些术语中工作。
+//
 type Digest string
 
 // NewDigest returns a Digest from alg and a hash.Hash object.

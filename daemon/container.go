@@ -101,6 +101,9 @@ func (daemon *Daemon) containerRoot(id string) string {
 
 // Load reads the contents of a container from disk
 // This is typically done at startup.
+// Load从磁盘读取容器的内容，这通常在启动时完成。
+//
+// load的实现流程如下：通过获取对应容器id目录下的config.json文件数据来实力话一个container对象，
 func (daemon *Daemon) load(id string) (*container.Container, error) {
 	ctr := daemon.newBaseContainer(id)
 
@@ -109,6 +112,7 @@ func (daemon *Daemon) load(id string) (*container.Container, error) {
 	}
 	selinux.ReserveLabel(ctr.ProcessLabel)
 
+	// 最后检查config.json(实际就是对应容器的容器信息文件)是否被更改过
 	if ctr.ID != id {
 		return ctr, fmt.Errorf("Container %s is stored at %s", ctr.ID, id)
 	}

@@ -27,6 +27,12 @@ import (
 // but lucky for us the Dockerfile isn't very complicated. This structure
 // works a little more effectively than a "proper" parse tree for our needs.
 //
+// 节点是用于表示解析树的结构。
+// 在该节点中有三个字段：Value、Next和Children。
+// value是当前标记的字符串值。
+// NEXT始终是下一个非子令牌，子代包含所有子代。
+// 这里有一个示例：(value next(Child Child-next Child-next-next)next-next)这种数据结构对于处理复杂的语言来说确实非常糟糕，但幸运的是，Dockerfile并不是很复杂。
+// 这种结构比“适当的”解析树更有效地满足我们的需要。
 type Node struct {
 	Value      string          // actual content
 	Next       *Node           // the next item in the current sexp

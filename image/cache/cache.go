@@ -215,6 +215,11 @@ func getImageIDAndError(img *image.Image, err error) (string, error) {
 // of the image with imgID, that had the same config when it was
 // created. nil is returned if a child cannot be found. An error is
 // returned if the parent image cannot be found.
+//
+// getLocalCachedImage返回最近创建的映像，该映像是具有imgID的映像的子项，在创建时具有相同的配置。
+// 如果找不到子级，则返回空。
+// 如果找不到父映像，则返回错误。
+//
 func getLocalCachedImage(imageStore image.Store, imgID image.ID, config *containertypes.Config) (*image.Image, error) {
 	// Loop on the children of the given image and check the config
 	getMatch := func(siblings []image.ID) (*image.Image, error) {

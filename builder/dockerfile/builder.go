@@ -119,7 +119,7 @@ type Builder struct {
 
 	Stdout io.Writer
 	Stderr io.Writer
-	Aux    *streamformatter.AuxFormatter
+	Aux    *streamformatter.AuxFormatter  // 在哪里初始化
 	Output io.Writer
 
 	docker    builder.Backend
@@ -212,6 +212,7 @@ func (b *Builder) build(source builder.Source, dockerfile *parser.Result) (*buil
 	}
 
 	// Add 'LABEL' command specified by '--label' option to the last stage
+	// 将‘--label’选项指定的‘label’命令添加到最后一个阶段
 	buildLabelOptions(b.options.Labels, stages)
 
 	dockerfile.PrintWarnings(b.Stderr)
@@ -235,6 +236,7 @@ func emitImageID(aux *streamformatter.AuxFormatter, state *dispatchState) error 
 
 func processMetaArg(meta instructions.ArgCommand, shlex *shell.Lex, args *BuildArgs) error {
 	// shell.Lex currently only support the concatenated string format
+	// shell.lex目前仅支持连接字符串格式
 	envs := convertMapToEnvList(args.GetAllAllowed())
 	if err := meta.Expand(func(word string) (string, error) {
 		return shlex.ProcessWord(word, envs)
@@ -252,6 +254,7 @@ func printCommand(out io.Writer, currentCommandIndex int, totalCommands int, cmd
 	return currentCommandIndex + 1
 }
 
+// 发送Dockerfile?
 func (b *Builder) dispatchDockerfileWithCancellation(parseResult []instructions.Stage, metaArgs []instructions.ArgCommand, escapeToken rune, source builder.Source) (*dispatchState, error) {
 	dispatchRequest := dispatchRequest{}
 	buildArgs := NewBuildArgs(b.options.BuildArgs)
@@ -279,6 +282,7 @@ func (b *Builder) dispatchDockerfileWithCancellation(parseResult []instructions.
 		dispatchRequest = newDispatchRequest(b, escapeToken, source, buildArgs, stagesResults)
 
 		currentCommandIndex = printCommand(b.Stdout, currentCommandIndex, totalCommands, stage.SourceCode)
+		// !处理FORM
 		if err := initializeStage(dispatchRequest, &stage); err != nil {
 			return nil, err
 		}
@@ -297,6 +301,7 @@ func (b *Builder) dispatchDockerfileWithCancellation(parseResult []instructions.
 
 			currentCommandIndex = printCommand(b.Stdout, currentCommandIndex, totalCommands, cmd)
 
+			// 核心方法
 			if err := dispatch(dispatchRequest, cmd); err != nil {
 				return nil, err
 			}

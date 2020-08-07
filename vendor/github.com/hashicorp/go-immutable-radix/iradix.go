@@ -129,6 +129,10 @@ func (t *Txn) trackChannel(ch chan struct{}) {
 // modified during the course of the transaction, it is used in-place. Set
 // forLeafUpdate to true if you are getting a write node to update the leaf,
 // which will set leaf mutation tracking appropriately as well.
+//
+// writeNode返回要修改的节点，如果当前节点在事务过程中已被修改，则就地使用。
+// 如果要让写节点更新叶，请将forLeafUpdate设置为true，这也会相应地设置叶突变跟踪。
+//
 func (t *Txn) writeNode(n *Node, forLeafUpdate bool) *Node {
 	// Ensure the writable set exists.
 	if t.writable == nil {

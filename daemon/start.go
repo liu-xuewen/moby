@@ -102,6 +102,9 @@ func (daemon *Daemon) ContainerStart(name string, hostConfig *containertypes.Hos
 // container needs, such as storage and networking, as well as links
 // between containers. The container is left waiting for a signal to
 // begin running.
+//
+// ContainerStart通过设置容器所需的一切(例如存储和网络)以及容器之间的链接来准备容器运行。
+// 容器等待信号开始运行。
 func (daemon *Daemon) containerStart(container *container.Container, checkpoint string, checkpointDir string, resetRestartManager bool) (err error) {
 	start := time.Now()
 	container.Lock()
@@ -122,6 +125,7 @@ func (daemon *Daemon) containerStart(container *container.Container, checkpoint 
 
 	// if we encounter an error during start we need to ensure that any other
 	// setup has been cleaned up properly
+	// 如果我们在启动过程中遇到错误，我们需要确保所有其他设置都已正确清理
 	defer func() {
 		if err != nil {
 			container.SetError(err)

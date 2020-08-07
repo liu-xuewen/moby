@@ -12,6 +12,10 @@ import (
 // which is used to store objects (rows) with multiple indexes based
 // on values. The database makes use of immutable radix trees to provide
 // transactions and MVCC.
+//
+// MemDB是内存中的数据库。
+// 它提供了表抽象，用于存储具有基于值的多个索引的对象(行)。
+// 数据库使用不变的基数树来提供事务和MVCC。  
 type MemDB struct {
 	schema *DBSchema
 	root   unsafe.Pointer // *iradix.Tree underneath
@@ -46,6 +50,9 @@ func (db *MemDB) getRoot() *iradix.Tree {
 
 // Txn is used to start a new transaction, in either read or write mode.
 // There can only be a single concurrent writer, but any number of readers.
+//
+// TXN用于在读取或写入模式下启动新事务。
+// 只能有一个并发写入器，但可以有任意数量的读取器。
 func (db *MemDB) Txn(write bool) *Txn {
 	if write {
 		db.writer.Lock()
