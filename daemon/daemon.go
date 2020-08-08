@@ -1326,6 +1326,7 @@ func (daemon *Daemon) Mount(container *container.Container) error {
 	if err != nil {
 		return err
 	}
+	// docker build 第十个log
 	logrus.Debugf("container mounted via layerStore: %v", dir)
 
 	if container.BaseFS != nil && container.BaseFS.Path() != dir.Path() {

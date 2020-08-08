@@ -161,6 +161,7 @@ func (ld *v2LayerDescriptor) DiffID() (layer.DiffID, error) {
 }
 
 func (ld *v2LayerDescriptor) Download(ctx context.Context, progressOutput progress.Output) (io.ReadCloser, int64, error) {
+	// docker build 第五个log
 	logrus.Debugf("pulling blob %q", ld.digest)
 
 	var (
@@ -271,6 +272,7 @@ func (ld *v2LayerDescriptor) Download(ctx context.Context, progressOutput progre
 
 	progress.Update(progressOutput, ld.ID(), "Download complete")
 
+	// docker build 第六个log
 	logrus.Debugf("Downloaded %s to tempfile %s", ld.ID(), tmpFile.Name())
 
 	_, err = tmpFile.Seek(0, io.SeekStart)
@@ -380,6 +382,7 @@ func (p *v2Puller) pullV2Tag(ctx context.Context, ref reference.Named, platform 
 	// the other side speaks the v2 protocol.
 	p.confirmedV2 = true
 
+	// docker build 第二个log
 	logrus.Debugf("Pulling ref from V2 registry: %s", reference.FamiliarString(ref))
 	progress.Message(p.config.ProgressOutput, tagOrDigest, "Pulling from "+reference.FamiliarName(p.repo.Named()))
 
@@ -778,6 +781,7 @@ func (p *v2Puller) pullManifestList(ctx context.Context, ref reference.Named, mf
 	if pp != nil {
 		platform = *pp
 	}
+	// docker build 第三个log
 	logrus.Debugf("%s resolved to a manifestList object with %d entries; looking for a %s/%s match", ref, len(mfstList.Manifests), platforms.Format(platform), runtime.GOARCH)
 
 	manifestMatches := filterManifests(mfstList.Manifests, platform)

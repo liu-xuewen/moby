@@ -1,5 +1,6 @@
 ## docker build .
 ```shell script
+# DEBU[2020-08-08T21:41:30.468126840+08:00] Calling POST /v1.40/build?buildargs={}&cachefrom=[]&cgroupparent=&cpuperiod=0&cpuquota=0&cpusetcpus=&cpusetmems=&cpushares=0&dockerfile=Dockerfile&labels={}&memory=0&memswap=0&networkmode=default&rm=1&shmsize=0&target=&ulimits=null&version=1 
 DEBU[2020-08-08T21:41:30.468126840+08:00] Calling POST /v1.40/build?buildargs=%7B%7D&cachefrom=%5B%5D&cgroupparent=&cpuperiod=0&cpuquota=0&cpusetcpus=&cpusetmems=&cpushares=0&dockerfile=Dockerfile&labels=%7B%7D&memory=0&memswap=0&networkmode=default&rm=1&shmsize=0&target=&ulimits=null&version=1 
 DEBU[2020-08-08T21:41:30.544863281+08:00] Trying to pull alpine from https://registry-1.docker.io v2 
 DEBU[2020-08-08T21:41:33.702496832+08:00] Pulling ref from V2 registry: alpine:3.8     

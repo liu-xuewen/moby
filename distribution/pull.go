@@ -21,6 +21,7 @@ type Puller interface {
 	// Pull tries to pull the image referenced by `tag`
 	// Pull returns an error if any, as well as a boolean that determines whether to retry Pull on the next configured endpoint.
 	//
+	// Pull尝试拉取`tag`Pull引用的镜像会返回错误(如果有)，以及一个布尔值，该布尔值用于确定是否在下一个配置的端点上重试拉取。
 	Pull(ctx context.Context, ref reference.Named, platform *specs.Platform) error
 }
 
@@ -73,6 +74,11 @@ func Pull(ctx context.Context, ref reference.Named, imagePullConfig *ImagePullCo
 		// It's needed for pull-by-digest on v1 endpoints: if there are only v1 endpoints configured, the error should be
 		// returned and displayed, but if there was a v2 endpoint which supports pull-by-digest, then the last relevant
 		// error is the ones from v2 endpoints not v1.
+		//
+		// discardNoSupportErrors用于跟踪端点是否遇到注册类型的错误。
+		// ErrNoSupport默认情况下为false，这意味着如果遇到ErrNoSupport错误，它将保存在lastErr中。
+		// 一旦遇到另一种错误，discardNoSupportErrors就被设置为true，从而避免在lastErr中保存任何后续的ErrNoSupport错误。
+		// v1端点上的Pull-by-digest需要它：如果只配置了v1端点，则应该返回并显示错误，但是如果有支持Pull-by-Digest的v2端点，则最后一个相关错误是来自v2端点而不是v1的错误。
 		discardNoSupportErrors bool
 
 		// confirmedV2 is set to true if a pull attempt managed to
@@ -102,6 +108,7 @@ func Pull(ctx context.Context, ref reference.Named, imagePullConfig *ImagePullCo
 			}
 		}
 
+		// docker build .首先进入这里
 		logrus.Debugf("Trying to pull %s from %s %s", reference.FamiliarName(repoInfo.Name), endpoint.URL, endpoint.Version)
 
 		puller, err := newPuller(endpoint, repoInfo, imagePullConfig)

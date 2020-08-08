@@ -274,6 +274,7 @@ func (ls *layerStore) applyTar(tx *fileMetadataTransaction, ts io.Reader, parent
 	layer.size = applySize
 	layer.diffID = DiffID(digester.Digest())
 
+	// docker build 第七个log
 	logrus.Debugf("Applied tar %s to %s, size: %d", layer.diffID, layer.cacheID, applySize)
 
 	return nil

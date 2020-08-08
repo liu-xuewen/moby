@@ -54,6 +54,7 @@ func (c *imageProber) Probe(parentID string, runConfig *container.Config) (strin
 		return "", err
 	}
 	if len(cacheID) == 0 {
+		// docker build 第八个log
 		logrus.Debugf("[BUILDER] Cache miss: %s", runConfig.Cmd)
 		c.cacheBusted = true
 		return "", nil

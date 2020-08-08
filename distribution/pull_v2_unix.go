@@ -24,6 +24,7 @@ func filterManifests(manifests []manifestlist.ManifestDescriptor, p specs.Platfo
 	for _, desc := range manifests {
 		if m.Match(toOCIPlatform(desc.Platform)) {
 			matches = append(matches, desc)
+			// docker build .第四个log
 			logrus.Debugf("found match for %s with media type %s, digest %s", platforms.Format(p), desc.MediaType, desc.Digest.String())
 		}
 	}

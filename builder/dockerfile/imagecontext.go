@@ -17,6 +17,9 @@ type getAndMountFunc func(string, bool, *specs.Platform) (builder.Image, builder
 
 // imageSources mounts images and provides a cache for mounted images. It tracks
 // all images so they can be unmounted at the end of the build.
+//
+// imageSources装载映像并为装载的映像提供缓存。
+// 它跟踪所有映像，以便可以在构建结束时卸载它们。
 type imageSources struct {
 	byImageID map[string]*imageMount
 	mounts    []*imageMount

@@ -743,7 +743,8 @@ func (d *Driver) ApplyDiff(id string, parent string, diff io.Reader) (size int64
 
 	applyDir := d.getDiffPath(id)
 
-	logger.Debugf("Applying tar in %s", applyDir)
+	// docker build 第七个log
+	logger.Debugf("Applying overlay2 tar in %s", applyDir)
 	// Overlay doesn't need the parent id to apply the diff
 	if err := untar(diff, applyDir, &archive.TarOptions{
 		UIDMaps:        d.uidMaps,

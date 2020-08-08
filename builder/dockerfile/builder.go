@@ -150,7 +150,7 @@ func newBuilder(clientCtx context.Context, options builderOptions) (*Builder, er
 		Output:           options.ProgressWriter.Output,
 		docker:           options.Backend,
 		idMapping:        options.IDMapping,
-		imageSources:     newImageSources(clientCtx, options),
+		imageSources:     newImageSources(clientCtx, options),  // 这里进行pull
 		pathCache:        options.PathCache,
 		imageProber:      newImageProber(options.Backend, config.CacheFrom, config.NoCache),
 		containerManager: newContainerManager(options.Backend),
