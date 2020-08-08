@@ -71,7 +71,9 @@ func (o *daemonOptions) InstallFlags(flags *pflag.FlagSet) {
 	flags.Var(opts.NewQuotedString(&tlsOptions.CertFile), "tlscert", "Path to TLS certificate file")
 	flags.Var(opts.NewQuotedString(&tlsOptions.KeyFile), "tlskey", "Path to TLS key file")
 
+	// hosts没有默认值吗？
 	hostOpt := opts.NewNamedListOptsRef("hosts", &o.Hosts, opts.ValidateHost)
+	// ExecStart=/usr/bin/dockerd -H fd://
 	flags.VarP(hostOpt, "host", "H", "Daemon socket(s) to connect to")
 }
 

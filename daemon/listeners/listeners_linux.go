@@ -20,6 +20,10 @@ func Init(proto, addr, socketGroup string, tlsConfig *tls.Config) ([]net.Listene
 
 	switch proto {
 	case "fd":
+		// ExecStart=/usr/bin/dockerd -H fd://
+		// systemd启动
+
+		// netstat |grep docker 发现两种方式都是unix 监听
 		fds, err := listenFD(addr, tlsConfig)
 		if err != nil {
 			return nil, err
@@ -32,6 +36,7 @@ func Init(proto, addr, socketGroup string, tlsConfig *tls.Config) ([]net.Listene
 		}
 		ls = append(ls, l)
 	case "unix":
+		// dockerd启动，此时需要自己创建并启动docker.sock监听
 		gid, err := lookupGID(socketGroup)
 		if err != nil {
 			if socketGroup != "" {
@@ -42,6 +47,8 @@ func Init(proto, addr, socketGroup string, tlsConfig *tls.Config) ([]net.Listene
 			}
 			gid = os.Getgid()
 		}
+
+		// 直接listen unix文件会自动创建unix监听文件，该文件存在则报错
 		l, err := sockets.NewUnixSocket(addr, gid)
 		if err != nil {
 			return nil, fmt.Errorf("can't create unix socket %s: %v", addr, err)
@@ -59,7 +66,9 @@ func Init(proto, addr, socketGroup string, tlsConfig *tls.Config) ([]net.Listene
 }
 
 // listenFD returns the specified socket activated files as a slice of
-// net.Listeners or all of the activated files if "*" is given.
+// net.Listeners or all of the activated files if "*" is given
+// listenFD返回指定套接字激活的文件作为net.listeners的片段，如果给定“*”，则返回所有激活的文件。
+//
 func listenFD(addr string, tlsConfig *tls.Config) ([]net.Listener, error) {
 	var (
 		err       error

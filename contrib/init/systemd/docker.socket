@@ -2,12 +2,25 @@
 Description=Docker Socket for the API
 
 [Socket]
+# 以 ".socket" 为后缀的单元文件， 封装了一个用于进程间通信的套接字(socket)或管道(FIFO)， 以支持基于套接字的启动。
+#
 # If /var/run is not implemented as a symlink to /run, you may need to
 # specify ListenStream=/var/run/docker.sock instead.
+#
+# 如果/var/run没有实现为/run的符号链接，您可能需要指定ListenStream=/var/run/docker.sock。
+#
+# 当字节流 SOCK_STREAM (也就是 ListenStream=) 应用于IP套接字时，其含义是TCP套接字
+# 直接 /dockerd -D 这个地方没有启动，为什么也可以
 ListenStream=/run/docker.sock
+# SocketMode=
+  # 设置创建文件节点时的 默认访问模式， 仅用于文件系统上的套接字文件与管道文件。 默认值是 0666 。
 SocketMode=0660
+# SocketUser=, SocketGroup=¶
+  # 接受一个 UNIX 用户/组 名称。 设置 AF_UNIX 套接字文件与 FIFO 管道文件的属主与属组。
+  # 默认未设置这两个选项， 表示文件的属主与属组都是root(运行于系统上下文) 或调用systemd的用户及其属组(运行于用户上下文)。 如果仅指定了用户，那么属组将被自动设为 该用户的默认组(主组)。
 SocketUser=root
 SocketGroup=docker
 
 [Install]
+# Install区块，定义如何安装这个配置文件，即怎样做到开机启动。
 WantedBy=sockets.target

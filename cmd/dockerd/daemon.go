@@ -88,6 +88,7 @@ func (cli *DaemonCli) start(opts *daemonOptions) (err error) {
 		return err
 	}
 
+	// -D的第一条日志
 	logrus.Info("Starting up")
 
 	cli.configFile = &opts.configFile
@@ -169,8 +170,13 @@ func (cli *DaemonCli) start(opts *daemonOptions) (err error) {
 	// 它分配ServeAPI(端口、Unix套接字)所需的资源。
 	cli.api = apiserver.New(serverConfig)
 
+	// 这里要加载 docker.sock服务监听
+	// 如果dockerd启动，直接listen unix文件会自动创建unix监听文件，该文件存在则报错
+	// 并将server router设置到accept里面
 	hosts, err := loadListeners(cli, serverConfig)
 	if err != nil {
+		// 直接运行 /usr/bin/dockerd -H fd:// 会报错
+		panic("failed to load listeners")
 		return errors.Wrap(err, "failed to load listeners")
 	}
 
@@ -586,6 +592,7 @@ func newAPIServerConfig(cli *DaemonCli) (*apiserver.Config, error) {
 		serverConfig.TLSConfig = tlsConfig
 	}
 
+	// 如果没有给他初始化为空字符串？
 	if len(cli.Config.Hosts) == 0 {
 		cli.Config.Hosts = make([]string, 1)
 	}
@@ -608,7 +615,9 @@ func loadListeners(cli *DaemonCli, serverConfig *apiserver.Config) ([]string, er
 		seen[cli.Config.Hosts[i]] = struct{}{}
 
 		protoAddr := cli.Config.Hosts[i]
+		// ExecStart=/usr/bin/dockerd -H fd://
 		protoAddrParts := strings.SplitN(protoAddr, "://", 2)
+		// fd是2
 		if len(protoAddrParts) != 2 {
 			return nil, fmt.Errorf("bad format %s, expected PROTO://ADDR", protoAddr)
 		}
@@ -616,10 +625,14 @@ func loadListeners(cli *DaemonCli, serverConfig *apiserver.Config) ([]string, er
 		proto := protoAddrParts[0]
 		addr := protoAddrParts[1]
 
+		// ExecStart=/usr/bin/dockerd -H fd://
+
 		// It's a bad idea to bind to TCP without tlsverify.
 		if proto == "tcp" && (serverConfig.TLSConfig == nil || serverConfig.TLSConfig.ClientAuth != tls.RequireAndVerifyClientCert) {
 			logrus.Warn("[!] DON'T BIND ON ANY IP ADDRESS WITHOUT setting --tlsverify IF YOU DON'T KNOW WHAT YOU'RE DOING [!]")
 		}
+
+		// 如果dockerd启动，直接listen unix文件会自动创建unix监听文件，该文件存在则报错
 		ls, err := listeners.Init(proto, addr, serverConfig.SocketGroup, serverConfig.TLSConfig)
 		if err != nil {
 			return nil, err
@@ -630,6 +643,8 @@ func loadListeners(cli *DaemonCli, serverConfig *apiserver.Config) ([]string, er
 				return nil, err
 			}
 		}
+
+		// 启动-D的第二条日志
 		logrus.Debugf("Listener created for HTTP on %s (%s)", proto, addr)
 		hosts = append(hosts, protoAddrParts[1])
 		cli.api.Accept(addr, ls...)

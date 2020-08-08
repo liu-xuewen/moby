@@ -31,6 +31,7 @@ var (
 )
 
 // ValidateHost validates that the specified string is a valid host and returns it.
+// ValidateHost验证指定的字符串是否为有效主机并返回它。
 func ValidateHost(val string) (string, error) {
 	host := strings.TrimSpace(val)
 	// The empty string means default and is not handled by parseDaemonHost
@@ -47,8 +48,12 @@ func ValidateHost(val string) (string, error) {
 
 // ParseHost and set defaults for a Daemon host string.
 // defaultToTLS is preferred over defaultToUnixXDG.
+//
+// ParseHost并设置守护程序主机字符串的默认值。
+// defaultToTLS优先于defaultToUnixXDG。
 func ParseHost(defaultToTLS, defaultToUnixXDG bool, val string) (string, error) {
 	host := strings.TrimSpace(val)
+	// 直接dockerd -D 会进入这里，此时host是空字符串
 	if host == "" {
 		if defaultToTLS {
 			host = DefaultTLSHost
@@ -63,6 +68,8 @@ func ParseHost(defaultToTLS, defaultToUnixXDG bool, val string) (string, error) 
 			host = DefaultHost
 		}
 	} else {
+		// ExecStart=/usr/bin/dockerd -H fd://
+		// systemctl启动会进入这里
 		var err error
 		host, err = parseDaemonHost(host)
 		if err != nil {
@@ -74,8 +81,14 @@ func ParseHost(defaultToTLS, defaultToUnixXDG bool, val string) (string, error) 
 
 // parseDaemonHost parses the specified address and returns an address that will be used as the host.
 // Depending of the address specified, this may return one of the global Default* strings defined in hosts.go.
+//
+// parseDaemonHost解析指定的地址并返回将用作主机的地址。
+// 根据指定的地址，这可能会返回hosts.go中定义的一个全局默认*字符串。
 func parseDaemonHost(addr string) (string, error) {
 	addrParts := strings.SplitN(addr, "://", 2)
+	//
+	//	addrParts := strings.SplitN("fd://", "://", 2)
+	// len(addrParts)=2 [fd ]
 	if len(addrParts) == 1 && addrParts[0] != "" {
 		addrParts = []string{"tcp", addrParts[0]}
 	}
@@ -88,6 +101,8 @@ func parseDaemonHost(addr string) (string, error) {
 	case "npipe":
 		return parseSimpleProtoAddr("npipe", addrParts[1], DefaultNamedPipe)
 	case "fd":
+		// ExecStart=/usr/bin/dockerd -H fd://
+		// len(addrParts)=2 [fd ]
 		return addr, nil
 	default:
 		return "", fmt.Errorf("Invalid bind address format: %s", addr)
@@ -98,6 +113,10 @@ func parseDaemonHost(addr string) (string, error) {
 // socket address for simple protocols like unix and npipe. It returns a formatted
 // socket address, either using the address parsed from addr, or the contents of
 // defaultAddr if addr is a blank string.
+//
+// parseSimpleProtoAddr解析并验证指定的地址是Unix和nPipe等简单协议的有效套接字地址。
+// 它使用从addr解析的地址返回格式化的套接字地址，如果addr为空字符串，则返回defaultAddr的内容。
+//
 func parseSimpleProtoAddr(proto, addr, defaultAddr string) (string, error) {
 	addr = strings.TrimPrefix(addr, proto+"://")
 	if strings.Contains(addr, "://") {

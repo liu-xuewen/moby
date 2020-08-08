@@ -1,20 +1,38 @@
 [Unit]
+# https://www.ruanyifeng.com/blog/2016/03/systemd-tutorial-part-two.html
+# Unit区块的Description字段给出当前服务的简单描述，Documentation字段给出文档位置
+# 相应地，还有一个Before字段，定义sshd.service应该在哪些服务之前启动。
+  #注意，After和Before字段只涉及启动顺序，不涉及依赖关系。
 Description=Docker Application Container Engine
 Documentation=https://docs.docker.com
 After=network-online.target docker.socket firewalld.service
+# 设置依赖关系，需要使用Wants字段和Requires字段。
+# Wants字段：表示sshd.service与sshd-keygen.service之间存在"弱依赖"关系，即如果"sshd-keygen.service"启动失败或停止运行，不影响sshd.service继续执行。
 Wants=network-online.target
+# Requires字段则表示"强依赖"关系，即如果该服务启动失败或异常退出，那么sshd.service也必须退出。
 Requires=docker.socket
 
 [Service]
+# Service区块定义如何启动当前服务。
 Type=notify
 # the default is not to use systemd for cgroups because the delegate issues still
 # exists and systemd currently does not support the cgroup feature set required
 # for containers run by docker
+# 缺省情况下不将systemd用于cgroup，因为委托问题仍然存在，并且systemd当前不支持docker运行的容器所需的cgroup功能集
+# 直接运行 /usr/bin/dockerd -H fd:// 会报错
+#
+#[root@VM_54_88_centos /run]# /usr/bin/dockerd -H fd://
+ #INFO[2020-08-08T20:03:51.720690980+08:00] Starting up
+ #failed to load listeners: no sockets found via socket activation: make sure the service was started by systemd
+#
 ExecStart=/usr/bin/dockerd -H fd://
 ExecReload=/bin/kill -s HUP $MAINPID
 LimitNOFILE=1048576
 # Having non-zero Limit*s causes performance problems due to accounting overhead
 # in the kernel. We recommend using cgroups to do container-local accounting.
+#
+# 具有非零限制*会由于内核中的记帐开销而导致性能问题。
+# 我们建议使用cgroup进行容器本地记帐。
 LimitNPROC=infinity
 LimitCORE=infinity
 # Uncomment TasksMax if your systemd version supports it.

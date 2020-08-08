@@ -25,6 +25,13 @@ import (
 // The order of the file descriptors is preserved in the returned slice.
 // Nil values are used to fill any gaps. For example if systemd were to return file descriptors
 // corresponding with "udp, tcp, tcp", then the slice would contain {nil, net.Listener, net.Listener}
+//
+// Listeners返回一个片，其中包含传递给此进程的每个匹配套接字类型的net.Listener。
+// 文件描述符的顺序保留在返回的片中。
+// 空值用于填充任何间隙。
+// 例如，如果systemd返回与“udp，tcp，tcp”对应的文件描述符，那么切片将包含{nil，net.Listener，net.Listener}
+//
+// systemd启动会进入这里，直接获取systemd对应的文件描述符
 func Listeners() ([]net.Listener, error) {
 	files := Files(true)
 	listeners := make([]net.Listener, len(files))

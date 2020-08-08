@@ -766,6 +766,7 @@ func (c *Command) execute(a []string) (err error) {
 	c.InitDefaultHelpFlag()
 	c.InitDefaultVersionFlag()
 
+	// 执行的时候解析flags？？？
 	err = c.ParseFlags(a)
 	if err != nil {
 		return c.FlagErrorFunc()(c, err)
@@ -883,7 +884,7 @@ func (c *Command) ExecuteContext(ctx context.Context) error {
 // Execute uses the args (os.Args[1:] by default)
 // and run through the command tree finding appropriate matches
 // for commands and then corresponding flags.
-// EXECUTE使用参数(默认情况下为os.args[1：])并遍历命令树，查找命令的适当匹配项，然后查找相应的标志。 
+// EXECUTE使用参数(默认情况下为os.args[1：])并遍历命令树，查找命令的适当匹配项，然后查找相应的标志。
 func (c *Command) Execute() error {
 	_, err := c.ExecuteC()
 	return err
